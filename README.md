@@ -1,5 +1,7 @@
 # workflow-project
 
+![The skill's own output, drawn: four real pages of a workflow PDF fanned out, the cover, the map from A to Z, a swimlane page for one part, and its table of steps](media/workflow-project-hero.png)
+
 **Understand a new project first. Then hand over how it works, from A to Z.**
 
 An agent skill that makes a project's **workflow**: a clean, professional PDF showing how a new project (or a
@@ -119,6 +121,7 @@ skills/workflow-project/     the skill (what gets installed)
   assets/                    the font (SIL Open Font License), brand.json and the logo
 tests/                       the checks (not shipped with the skill)
 docs/                        scope, architecture, decisions
+media/                       the picture at the top of this page
 ```
 
 ## Update every machine

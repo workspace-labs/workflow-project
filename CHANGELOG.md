@@ -8,9 +8,9 @@ All notable changes to this project. The version is `VERSION` in
 ### Published on GitHub
 
 The accepted 0.2.0, unchanged, published at `workspace-labs/workflow-project`: a README for readers (install
-for every agent, no paths from the builder's own machine) and the MIT licence. The fonts keep their SIL Open
-Font License; the logo stays WorkSpace Labs' own. The skill folder is byte-identical to the reviewed and
-accepted version, so the version stays 0.2.0.
+for every agent, no paths from the builder's own machine), the MIT licence, and a picture drawn from the
+included example's real pages. The fonts keep their SIL Open Font License; the logo stays WorkSpace Labs'
+own. The skill folder is byte-identical to the reviewed and accepted version, so the version stays 0.2.0.
 
 ### Fix round 2 (Codex re-review 1: F03 only, the owner's go)
 
