@@ -1,0 +1,40 @@
+{
+  "project": {
+    "name": "Leave Request System",
+    "accent": "Request",
+    "client": "Sample client",
+    "date": "2026-09-25",
+    "version": "1.0",
+    "summary": "An online form where employees ask for time off. The system checks how many days they have left, their manager approves or refuses, and HR records the leave, so nobody chases paper forms.",
+    "actors": [
+      {"name": "Employee", "role": "Asks for time off and gets the answer."},
+      {"name": "System", "role": "Checks the balance and tells everyone what happened."},
+      {"name": "Manager", "role": "Approves or refuses the request."},
+      {"name": "HR", "role": "Keeps the official record."}
+    ],
+    "assumptions": ["Every employee already has a login.", "A manager answers within two working days."],
+    "open_questions": ["What happens when the manager is on leave themselves?"]
+  },
+  "parts": [
+    {
+      "title": "How a leave request works",
+      "summary": "From the moment an employee asks for leave to the moment it is on the team calendar.",
+      "lanes": ["Employee", "System", "Manager", "HR"],
+      "nodes": [
+        {"id": "start", "type": "start", "lane": "Employee", "title": "Needs time off"},
+        {"id": "form", "type": "step", "lane": "Employee", "title": "Fills in the form", "detail": "dates, type, reason", "result": "A new request"},
+        {"id": "balance", "type": "step", "lane": "System", "title": "Checks the balance", "detail": "days left this year", "result": "Enough days, or not"},
+        {"id": "enough", "type": "decision", "lane": "System", "title": "Enough days?",
+         "branches": [{"label": "Yes", "to": "review"}, {"label": "No", "to": "no-days"}]},
+        {"id": "no-days", "type": "stop", "lane": "Employee", "title": "Stopped", "detail": "not enough days"},
+        {"id": "review", "type": "step", "lane": "Manager", "title": "Reviews the request", "detail": "within 2 working days", "result": "Approved or refused"},
+        {"id": "approve", "type": "decision", "lane": "Manager", "title": "Approves?",
+         "branches": [{"label": "Yes", "to": "record"}, {"label": "No", "to": "refused"}]},
+        {"id": "refused", "type": "stop", "lane": "Employee", "title": "Refused", "detail": "the reason is given"},
+        {"id": "record", "type": "step", "lane": "HR", "title": "Records the leave", "detail": "in the staff file", "result": "An official record"},
+        {"id": "tell", "type": "step", "lane": "System", "title": "Tells everyone", "detail": "balance, email, calendar", "result": "Everyone knows"},
+        {"id": "done", "type": "end", "lane": "Employee", "title": "Leave confirmed"}
+      ]
+    }
+  ]
+}

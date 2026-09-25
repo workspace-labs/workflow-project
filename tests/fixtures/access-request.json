@@ -1,0 +1,107 @@
+{
+  "project": {
+    "name": "Access Request",
+    "summary": "An independent review case with revision, a join, five actors and refusal.",
+    "date": "2026-09-25",
+    "actors": [
+      {
+        "name": "Applicant",
+        "role": "Handles the request."
+      },
+      {
+        "name": "Intake",
+        "role": "Handles the request."
+      },
+      {
+        "name": "Reviewer",
+        "role": "Handles the request."
+      },
+      {
+        "name": "Records",
+        "role": "Handles the request."
+      },
+      {
+        "name": "System",
+        "role": "Handles the request."
+      }
+    ]
+  },
+  "parts": [
+    {
+      "title": "Review access",
+      "summary": "Check the request, correct it if needed, then grant or refuse access.",
+      "lanes": [
+        "Applicant",
+        "Intake",
+        "Reviewer",
+        "Records",
+        "System"
+      ],
+      "nodes": [
+        {
+          "id": "start",
+          "type": "start",
+          "lane": "Applicant",
+          "title": "Needs access"
+        },
+        {
+          "id": "submit",
+          "type": "step",
+          "lane": "Intake",
+          "title": "Receives form"
+        },
+        {
+          "id": "check",
+          "type": "decision",
+          "lane": "Reviewer",
+          "title": "Ready?",
+          "branches": [
+            {
+              "label": "Yes",
+              "to": "record"
+            },
+            {
+              "label": "Revise",
+              "to": "revise"
+            },
+            {
+              "label": "Reject",
+              "to": "stop"
+            }
+          ]
+        },
+        {
+          "id": "revise",
+          "type": "step",
+          "lane": "Applicant",
+          "title": "Fixes form",
+          "next": "submit"
+        },
+        {
+          "id": "stop",
+          "type": "stop",
+          "lane": "System",
+          "title": "Refused"
+        },
+        {
+          "id": "record",
+          "type": "step",
+          "lane": "Records",
+          "title": "Records access"
+        },
+        {
+          "id": "notify",
+          "type": "step",
+          "lane": "System",
+          "title": "Sends notice"
+        },
+        {
+          "id": "end",
+          "type": "end",
+          "lane": "Applicant",
+          "title": "Has access"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+# Python caches
+__pycache__/
+*.pyc
+
+# Built things: the zip for the Claude app and any drawn PDF are made from the source here
+dist/
+*.pdf
+
+# macOS
+.DS_Store
+
+# Environment files and secrets never enter the repository
+.env
+.env.*

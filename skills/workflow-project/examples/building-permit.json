@@ -1,0 +1,98 @@
+{
+  "project": {
+    "name": "Online Building Permit",
+    "accent": "Building",
+    "client": "Sample municipality",
+    "date": "2026-09-25",
+    "version": "1.0",
+    "summary": "A website where owners apply for a building permit without visiting an office. Officers check the documents, an inspector visits the site, and the permit is paid for and issued online with a QR code anyone can verify.",
+    "actors": [
+      {"name": "Applicant", "role": "The owner or their engineer, who applies and follows up."},
+      {"name": "Portal", "role": "The website: checks forms, sends messages, issues the permit."},
+      {"name": "Officer", "role": "Checks the documents and books the site visit."},
+      {"name": "Engineer", "role": "Checks the structure of large buildings."},
+      {"name": "Manager", "role": "Signs off the review."},
+      {"name": "Inspector", "role": "Visits the site and writes the report."},
+      {"name": "Finance", "role": "Confirms the fee was paid."}
+    ],
+    "assumptions": [
+      "Applicants sign in with the national digital ID.",
+      "Buildings over four floors always need an engineer's check."
+    ],
+    "open_questions": [
+      "How many days does the applicant get to fix the site after a failed inspection?",
+      "Can the fee be paid in instalments?"
+    ]
+  },
+  "parts": [
+    {
+      "title": "Apply online",
+      "summary": "The applicant sends a complete application and gets a reference number.",
+      "lanes": ["Applicant", "Portal"],
+      "nodes": [
+        {"id": "start", "type": "start", "lane": "Applicant", "title": "Needs a building permit"},
+        {"id": "sign-in", "type": "step", "lane": "Applicant", "title": "Signs in", "detail": "with the national digital ID", "result": "An account"},
+        {"id": "form", "type": "step", "lane": "Applicant", "title": "Fills in the application", "detail": "plot, plans, owner details", "result": "A draft application"},
+        {"id": "upload", "type": "step", "lane": "Applicant", "title": "Uploads the documents", "detail": "plans, title deed, approvals", "result": "Files attached"},
+        {"id": "check", "type": "step", "lane": "Portal", "title": "Checks it is complete", "detail": "required fields and files"},
+        {"id": "complete", "type": "decision", "lane": "Portal", "title": "Complete?",
+         "branches": [{"label": "Yes", "to": "number"}, {"label": "No", "to": "missing"}]},
+        {"id": "missing", "type": "step", "lane": "Portal", "title": "Shows what is missing", "detail": "field by field", "next": "upload"},
+        {"id": "number", "type": "step", "lane": "Portal", "title": "Issues a reference number", "detail": "by email and text message", "result": "The application number"},
+        {"id": "sent", "type": "end", "lane": "Applicant", "title": "Application sent", "to_part": 2}
+      ]
+    },
+    {
+      "title": "Check the documents",
+      "summary": "An officer checks everything; large buildings also get an engineer's check.",
+      "lanes": ["Applicant", "Portal", "Officer", "Engineer", "Manager"],
+      "nodes": [
+        {"id": "start", "type": "start", "lane": "Portal", "title": "Application received"},
+        {"id": "review", "type": "step", "lane": "Officer", "title": "Reviews the documents", "detail": "against the building code", "result": "Correct, or a list of fixes"},
+        {"id": "correct", "type": "decision", "lane": "Officer", "title": "Correct?",
+         "branches": [{"label": "Yes", "to": "big"}, {"label": "No", "to": "ask"}]},
+        {"id": "ask", "type": "step", "lane": "Officer", "title": "Asks for corrections", "detail": "one clear list", "result": "A message to the applicant"},
+        {"id": "fix", "type": "step", "lane": "Applicant", "title": "Sends corrected files", "detail": "within 14 days"},
+        {"id": "on-time", "type": "decision", "lane": "Portal", "title": "On time?",
+         "branches": [{"label": "Yes", "to": "review"}, {"label": "No", "to": "closed"}]},
+        {"id": "closed", "type": "stop", "lane": "Applicant", "title": "Closed", "detail": "no reply in 14 days"},
+        {"id": "big", "type": "decision", "lane": "Officer", "title": "Over 4 floors?",
+         "branches": [{"label": "Yes", "to": "structure"}, {"label": "No", "to": "sign"}]},
+        {"id": "structure", "type": "step", "lane": "Engineer", "title": "Checks the structure", "detail": "loads and fire safety", "result": "Structure approved"},
+        {"id": "sign", "type": "step", "lane": "Manager", "title": "Signs the review", "result": "A signed review"},
+        {"id": "ready", "type": "end", "lane": "Portal", "title": "Ready for inspection", "to_part": 3}
+      ]
+    },
+    {
+      "title": "Inspect the site",
+      "summary": "An inspector visits and compares the site with the approved plans.",
+      "lanes": ["Applicant", "Portal", "Inspector", "Officer"],
+      "nodes": [
+        {"id": "start", "type": "start", "lane": "Portal", "title": "Review signed"},
+        {"id": "book", "type": "step", "lane": "Portal", "title": "Books the visit", "detail": "applicant picks a time", "result": "A visit date"},
+        {"id": "visit", "type": "step", "lane": "Inspector", "title": "Visits the site", "detail": "with the approved plans"},
+        {"id": "report", "type": "step", "lane": "Inspector", "title": "Writes the report", "detail": "photos and findings", "result": "The inspection report"},
+        {"id": "matches", "type": "decision", "lane": "Officer", "title": "Site matches?",
+         "branches": [{"label": "Yes", "to": "passed"}, {"label": "No", "to": "repair"}]},
+        {"id": "repair", "type": "step", "lane": "Applicant", "title": "Fixes the site", "detail": "then asks for a new visit", "next": "book"},
+        {"id": "passed", "type": "end", "lane": "Portal", "title": "Inspection passed", "to_part": 4}
+      ]
+    },
+    {
+      "title": "Pay and receive the permit",
+      "summary": "The fee is paid online and the signed permit is issued with a QR code.",
+      "lanes": ["Applicant", "Portal", "Finance", "Officer"],
+      "nodes": [
+        {"id": "start", "type": "start", "lane": "Portal", "title": "Inspection passed"},
+        {"id": "fee", "type": "step", "lane": "Portal", "title": "Calculates the fee", "detail": "by plot size and floors", "result": "The amount to pay"},
+        {"id": "pay", "type": "step", "lane": "Applicant", "title": "Pays online", "detail": "card or bank transfer"},
+        {"id": "paid", "type": "decision", "lane": "Finance", "title": "Paid?",
+         "branches": [{"label": "Yes", "to": "approve"}, {"label": "No", "to": "remind"}]},
+        {"id": "remind", "type": "step", "lane": "Portal", "title": "Sends a reminder", "detail": "after 3 days", "next": "pay"},
+        {"id": "approve", "type": "step", "lane": "Officer", "title": "Approves the permit", "detail": "digital signature", "result": "An approved permit"},
+        {"id": "issue", "type": "step", "lane": "Portal", "title": "Issues the permit", "detail": "a PDF with a QR code", "result": "The building permit"},
+        {"id": "received", "type": "end", "lane": "Applicant", "title": "Permit received"}
+      ]
+    }
+  ]
+}
