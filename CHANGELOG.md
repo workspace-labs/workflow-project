@@ -5,6 +5,13 @@ All notable changes to this project. The version is `VERSION` in
 
 ## [0.2.0] - 2026-09-25
 
+### Published on GitHub
+
+The accepted 0.2.0, unchanged, published at `workspace-labs/workflow-project`: a README for readers (install
+for every agent, no paths from the builder's own machine) and the MIT licence. The fonts keep their SIL Open
+Font License; the logo stays WorkSpace Labs' own. The skill folder is byte-identical to the reviewed and
+accepted version, so the version stays 0.2.0.
+
 ### Fix round 2 (Codex re-review 1: F03 only, the owner's go)
 
 The version stays 0.2.0 (the owner's Rule 27). Tests only: the drawing tool is unchanged, so the skill

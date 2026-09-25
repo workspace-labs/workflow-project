@@ -1,10 +1,18 @@
 # workflow-project
 
-An agent skill that makes a project's **workflow**: a clean, professional PDF showing how a new
-project (or a new skill) works from A to Z, before anyone builds it. Companies and government
-offices expect the builder to hand one over; this skill makes the same document on every agent.
+**Understand a new project first. Then hand over how it works, from A to Z.**
 
-**Version 0.2.0** · built 2026-09-25 · not committed, not published (the owner decides both).
+An agent skill that makes a project's **workflow**: a clean, professional PDF showing how a new project (or a
+new skill) works, before anyone builds it. Who does what, every step, every decision, and where a request
+stops early. Companies and government offices expect the builder to hand one over; this skill makes the same
+document on every agent.
+
+The skill is the folder [`skills/workflow-project/`](skills/workflow-project/): its instructions,
+[`SKILL.md`](skills/workflow-project/SKILL.md), and its own drawing tool, so every agent draws the same PDF.
+
+**Version 0.2.0**
+
+---
 
 ## What the PDF holds
 
@@ -14,10 +22,10 @@ offices expect the builder to hand one over; this skill makes the same document 
 4. **For each part**: a swimlane page (one column per person or system; a blue line for the normal path;
    dashed grey lines for the other paths; gold diamonds for decisions; a red ring where it stops early),
    then a table of every step (who, what happens, what comes out).
-5. **End card**: the logo, the project's name, two plain lines, `workspace-labs.net`.
+5. **End card**: the logo, the project's name, two plain lines, and the website.
 
-The page count grows with the project. There is no dashboard, no number tiles, no charts. The look is the
-WorkSpace Labs video look (Plus Jakarta Sans, light ground, one blue accent word).
+The page count grows with the project. There is no dashboard, no number tiles, no charts. The look is fixed:
+Plus Jakarta Sans, a light ground, one blue accent word.
 
 ## How it works
 
@@ -27,28 +35,37 @@ WorkSpace Labs video look (Plus Jakarta Sans, light ground, one blue accent word
    fit, an arrow that would cross a box, a part too long for a page) and says exactly what to change.
 4. The agent looks at every page and hands it over.
 
-On the Workspace board, Grok makes it while planning a new project or skill; that board rule lives in
-the Workspace app's `GROK.md`, so the skill itself stays general for every agent.
-
 ## Install
 
-The skill is the folder `skills/workflow-project/`. Every agent reads the same folder.
+The drawing tool needs Python 3.9 or newer and the `reportlab` package (already in Claude's and ChatGPT's
+sandboxes; elsewhere `python3 -m pip install reportlab`).
 
-| Agent | How |
-|---|---|
-| Claude Code and Grok (this Mac) | `~/.claude/skills/workflow-project` is a link to `skills/workflow-project/` here, so changes here are live. |
-| Codex (this Mac) | the Mac's `sync-codex-skills.sh` copies it into `~/.codex/skills/` at the next Claude Workspace or cockpit start. |
-| Claude app (chat and Cowork) | upload `dist/workflow-project.zip`: **Customize → Skills → upload**. |
-| ChatGPT | same format. Where your plan offers **Skills → Create → Upload from your computer**, upload the same zip. Not tested yet. |
-| Another computer | copy `skills/workflow-project/` into that agent's skills folder. |
-
-Rebuild the zip after any change:
+**Claude Code, Codex and other agents**, in one line:
 
 ```bash
-cd ~/Desktop/Projects/workflow-project
+npx skills add workspace-labs/workflow-project -g
+```
+
+Or by hand, for Claude Code:
+
+```bash
+git clone https://github.com/workspace-labs/workflow-project.git
+mkdir -p ~/.claude/skills
+cp -R workflow-project/skills/workflow-project ~/.claude/skills/
+```
+
+**Claude app (chat and Cowork)**: make the zip, then upload it in **Customize → Skills**.
+
+```bash
+cd workflow-project
 rm -f dist/workflow-project.zip && mkdir -p dist
 (cd skills && zip -r -X ../dist/workflow-project.zip workflow-project -x '*/__pycache__/*' '*.pyc' '*.DS_Store')
 ```
+
+**ChatGPT**: where your plan offers **Skills → Create → Upload from your computer**, upload the same zip.
+Not tested yet.
+
+Then start a fresh session and ask for a new project. The agent asks its questions first, then hands over the PDF.
 
 ## Your own brand
 
@@ -59,9 +76,9 @@ Every PDF carries a name, a logo and a website, WorkSpace Labs by default. They 
 {"name": "WorkSpace Labs", "accent": "Labs", "website": "workspace-labs.net", "logo": "logo-mark.png"}
 ```
 
-Another user replaces it with their own and puts their logo (PNG or JPEG) beside it. `accent` is the one
-word of the name drawn in blue (`""` for none); `logo` and `website` may be `""`. The rest of the look (font,
-colours, layout) stays the same for everyone. A broken brand file is refused before anything is drawn.
+Replace it with your own and put your logo (PNG or JPEG) beside it. `accent` is the one word of the name
+drawn in blue (`""` for none); `logo` and `website` may be `""`. The rest of the look (font, colours, layout)
+stays the same for everyone. A broken brand file is refused before anything is drawn.
 
 ## Run the drawing tool yourself
 
@@ -69,8 +86,6 @@ colours, layout) stays the same for everyone. A broken brand file is refused bef
 python3 skills/workflow-project/scripts/draw_workflow.py skills/workflow-project/examples/building-permit.json -o "Building Permit - Workflow.pdf"
 python3 skills/workflow-project/scripts/draw_workflow.py my-workflow.json --check     # checks only
 ```
-
-It needs Python 3.9 or newer and the `reportlab` package (already in Claude's and ChatGPT's sandboxes).
 
 ## Test
 
@@ -106,7 +121,17 @@ tests/                       the checks (not shipped with the skill)
 docs/                        scope, architecture, decisions
 ```
 
+## Update every machine
+
+An installed copy does not update itself. After a change lands here, run the install line again on each
+machine (or `git pull` in a clone the skill is linked from), then open a fresh session.
+
 ## Credits and licence
 
-Plus Jakarta Sans is by Tokotype, under the SIL Open Font License 1.1 (see `CREDITS.md`). The logo is
-WorkSpace Labs' own artwork. The project's own licence is not chosen yet.
+The code is under the MIT licence (`LICENSE`). Plus Jakarta Sans is by Tokotype, under the SIL Open Font
+License 1.1 (see `CREDITS.md`). The logo and the WorkSpace Labs name are WorkSpace Labs' own and are not
+covered by the MIT licence; replace them with yours through `assets/brand.json`.
+
+---
+
+<sub>by Workspace Labs</sub>

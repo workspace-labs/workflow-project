@@ -6,7 +6,7 @@ is in `docs/scope.md`.
 ## Test
 
 ```bash
-cd ~/Desktop/Projects/workflow-project
+cd workflow-project        # your clone
 python3 -m unittest discover -s tests
 ```
 
