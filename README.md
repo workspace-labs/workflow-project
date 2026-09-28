@@ -12,7 +12,7 @@ document on every agent.
 The skill is the folder [`skills/workflow-project/`](skills/workflow-project/): its instructions,
 [`SKILL.md`](skills/workflow-project/SKILL.md), and its own drawing tool, so every agent draws the same PDF.
 
-**Version 0.2.0**
+**Version 0.2.1**
 
 ---
 
@@ -95,7 +95,7 @@ python3 skills/workflow-project/scripts/draw_workflow.py my-workflow.json --chec
 python3 -m unittest discover -s tests
 ```
 
-68 checks: the file rules and their plain-language refusals; the drawing's cleanliness (no arrow through a box,
+71 checks: the file rules and their plain-language refusals; the drawing's cleanliness (no arrow through a box,
 no two arrows touching or crossing, nothing overlapping), judged by `tests/geometry_oracle.py`, which never
 imports the tool; every word of accepted PDFs read back with `pdftotext` (skipped where poppler is missing);
 the whole PDF (pages, page numbers, fonts); the brand file, including a name or website too wide for where

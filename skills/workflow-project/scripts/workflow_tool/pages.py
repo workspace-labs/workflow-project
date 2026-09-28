@@ -62,12 +62,18 @@ def _bold(text):
     return '<font name="%s" color="#10182E">%s</font>' % (theme.BOLD, escape(text))
 
 
+# English month names. strftime("%B") follows the computer's language, and an Arabic or
+# Russian month is a string the house font cannot draw. The date on the page stays English.
+_MONTHS = ("January", "February", "March", "April", "May", "June",
+           "July", "August", "September", "October", "November", "December")
+
+
 def nice_date(value):
     try:
         day = datetime.datetime.strptime(value, "%Y-%m-%d").date()
     except ValueError:
         return value
-    return "%d %s %d" % (day.day, day.strftime("%B"), day.year)
+    return "%d %s %d" % (day.day, _MONTHS[day.month - 1], day.year)
 
 
 # ---------------------------------------------------------------- small flowables

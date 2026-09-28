@@ -2,7 +2,9 @@
 command line that answers in plain words."""
 
 import base64
+import importlib.util
 import io
+import locale
 import os
 import re
 import zlib
@@ -12,11 +14,13 @@ import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 
+import pdf_words
 import support
 from workflow_tool import brand, layout, model, pages
 
-EXPECTED_PAGES = {"leave-request": 5, "building-permit": 11, "workflow-project": 9}
+EXPECTED_PAGES = {"leave-request": 5, "building-permit": 11, "workflow-project": 10}
 TOOL = os.path.join(support.SCRIPTS, "draw_workflow.py")
+ENGLISH_DATE = "25 September 2026"
 
 
 def build(name, folder):
@@ -26,6 +30,68 @@ def build(name, folder):
     found = pages.build(project, diagrams, path, brand.load())
     with open(path, "rb") as handle:
         return project, found, handle.read()
+
+
+def _draw_here(source, out):
+    """Draw with this process's locale. A new Python would not inherit locale.setlocale."""
+    spec = importlib.util.spec_from_file_location("draw_workflow_under_test", TOOL)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    stdout, stderr = io.StringIO(), io.StringIO()
+    with redirect_stdout(stdout), redirect_stderr(stderr):
+        code = module.main([source, "-o", out])
+    return code, stdout.getvalue(), stderr.getvalue()
+
+
+def _lines(words):
+    """Words on one baseline, left to right, joined into lines."""
+    rows = []
+    for x0, y0, x1, y1, text in sorted(words, key=lambda item: (round(item[1], 1), item[0])):
+        if rows and abs(y0 - rows[-1][0]) <= 2.0:
+            rows[-1][1].append(text)
+        else:
+            rows.append((y0, [text]))
+    return [" ".join(parts) for _, parts in rows]
+
+
+class DatesStayEnglish(unittest.TestCase):
+    """The cover month used to follow the computer's language. Arabic drew empty boxes."""
+
+    def setUp(self):
+        self._previous_locale = locale.setlocale(locale.LC_ALL)
+
+    def tearDown(self):
+        locale.setlocale(locale.LC_ALL, self._previous_locale)
+
+    def test_the_month_is_english_in_any_locale(self):
+        for loc in ("C", "fr_FR.UTF-8", "ar_AE.UTF-8", "ru_RU.UTF-8"):
+            with self.subTest(locale=loc):
+                locale.setlocale(locale.LC_ALL, loc)
+                self.assertEqual(pages.nice_date("2026-09-25"), ENGLISH_DATE)
+                self.assertEqual(pages.nice_date("not-a-date"), "not-a-date")
+
+    @unittest.skipUnless(pdf_words.AVAILABLE, "pdftotext is not installed")
+    def test_the_drawn_date_stays_english(self):
+        source = os.path.join(support.EXAMPLES, "leave-request.json")
+        for loc in ("fr_FR.UTF-8", "ar_AE.UTF-8"):
+            with self.subTest(locale=loc):
+                locale.setlocale(locale.LC_ALL, loc)
+                with tempfile.TemporaryDirectory() as folder:
+                    out = os.path.join(folder, "out.pdf")
+                    code, stdout, stderr = _draw_here(source, out)
+                    self.assertEqual(code, 0, stderr or stdout)
+                    self.assertNotIn("Traceback", stderr)
+                    drawn = pdf_words.pages(out)
+                    cover = _lines(drawn[0][2])
+                    self.assertTrue(any(ENGLISH_DATE in line for line in cover), cover)
+                    footers = []
+                    for number, (_, _, words) in enumerate(drawn, 1):
+                        for line in _lines(words):
+                            if re.search(r"Page \d+ of \d+", line):
+                                footers.append((number, line))
+                    self.assertGreaterEqual(len(footers), 1, "no inner-page footer was drawn")
+                    for number, line in footers:
+                        self.assertIn(ENGLISH_DATE, line, "page %d footer %r" % (number, line))
 
 
 class WholePdf(unittest.TestCase):

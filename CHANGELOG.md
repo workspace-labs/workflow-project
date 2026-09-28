@@ -3,6 +3,13 @@
 All notable changes to this project. The version is `VERSION` in
 `skills/workflow-project/scripts/workflow_tool/__init__.py`.
 
+## [0.2.1] - 2026-09-28
+
+### Fixed
+
+- The date on the cover and in the footer is always English. It used to follow the computer's language, so a French machine printed "septembre" and an Arabic machine printed a month the font cannot draw, as empty boxes, while the tool still said every word fit.
+- The skill's own workflow. If a skill already exists, "Build ours?" now goes on to the questions, and "Install it" is the stop. Before, both choices died at one stop. The first part is now "What was asked" and the questions are the next part, "Say it back", because the extra choice would not fit on the old page without an arrow through a box.
+
 ## [0.2.0] - 2026-09-25
 
 ### Published on GitHub

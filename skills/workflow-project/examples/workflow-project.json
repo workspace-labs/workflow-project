@@ -4,7 +4,7 @@
     "accent": "Workflow",
     "prepared_by": "WorkSpace Labs",
     "date": "2026-09-25",
-    "version": "0.1",
+    "version": "0.2.1",
     "summary": "A skill for every AI agent. When someone asks for a new project or a new skill, the agent first understands it, then draws how it will work from A to Z as a clean workflow PDF, before anything is built.",
     "actors": [
       {"name": "You", "role": "The person who asks for the project and says yes."},
@@ -16,23 +16,34 @@
   },
   "parts": [
     {
-      "title": "Understand the idea",
-      "summary": "Nothing is drawn until the agent can say the idea back and you say yes.",
+      "title": "What was asked",
+      "summary": "A new project goes straight on. A new skill is looked up first, then you build ours or install the one that exists.",
       "lanes": ["You", "The AI"],
       "nodes": [
         {"id": "start", "type": "start", "lane": "You", "title": "Asks for something new"},
         {"id": "skill", "type": "decision", "lane": "The AI", "title": "A new skill?",
-         "branches": [{"label": "No", "to": "ask"}, {"label": "Yes", "to": "search"}]},
+         "branches": [{"label": "No", "to": "ready"}, {"label": "Yes", "to": "search"}]},
         {"id": "search", "type": "step", "lane": "The AI", "title": "Looks for an existing skill", "detail": "installed and public ones"},
         {"id": "exists", "type": "decision", "lane": "The AI", "title": "One exists?",
-         "branches": [{"label": "No", "to": "ask"}, {"label": "Yes", "to": "choose"}]},
-        {"id": "choose", "type": "stop", "lane": "You", "title": "You choose", "detail": "install it, or build ours"},
+         "branches": [{"label": "No", "to": "ready"}, {"label": "Yes", "to": "build"}]},
+        {"id": "build", "type": "decision", "lane": "You", "title": "Build ours?",
+         "branches": [{"label": "Yes", "to": "ready"}, {"label": "No", "to": "install"}]},
+        {"id": "install", "type": "stop", "lane": "You", "title": "Install it", "detail": "the one that already exists"},
+        {"id": "ready", "type": "end", "lane": "The AI", "title": "Ready to ask", "to_part": 2}
+      ]
+    },
+    {
+      "title": "Say it back",
+      "summary": "The agent asks, you answer, and it repeats the idea until you say yes.",
+      "lanes": ["You", "The AI"],
+      "nodes": [
+        {"id": "start", "type": "start", "lane": "The AI", "title": "Ready to ask"},
         {"id": "ask", "type": "step", "lane": "The AI", "title": "Asks the questions", "detail": "who, what, every decision", "result": "Your answers"},
         {"id": "answer", "type": "step", "lane": "You", "title": "Answers", "detail": "clicks or your own words"},
         {"id": "readback", "type": "step", "lane": "The AI", "title": "Says it back", "detail": "in its own words", "result": "A read-back"},
         {"id": "right", "type": "decision", "lane": "You", "title": "That's it?",
          "branches": [{"label": "Yes", "to": "understood"}, {"label": "No", "to": "ask"}]},
-        {"id": "understood", "type": "end", "lane": "The AI", "title": "Understood", "to_part": 2}
+        {"id": "understood", "type": "end", "lane": "The AI", "title": "Understood", "to_part": 3}
       ]
     },
     {
@@ -48,7 +59,7 @@
          "branches": [{"label": "Yes", "to": "draw"}, {"label": "No", "to": "fix"}]},
         {"id": "fix", "type": "step", "lane": "The AI", "title": "Fixes what it says", "next": "check"},
         {"id": "draw", "type": "step", "lane": "Drawing tool", "title": "Draws the PDF", "detail": "in the house look", "result": "The workflow PDF"},
-        {"id": "ready", "type": "end", "lane": "The AI", "title": "PDF ready", "to_part": 3}
+        {"id": "ready", "type": "end", "lane": "The AI", "title": "PDF ready", "to_part": 4}
       ]
     },
     {

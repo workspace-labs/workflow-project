@@ -34,6 +34,19 @@ class ExamplesLoad(unittest.TestCase):
         other = [(e.source, e.target) for e in part.edges if not e.main]
         self.assertEqual(sorted(other), [("approve", "refused"), ("enough", "no-days")])
 
+    def test_an_existing_skill_can_still_be_built(self):
+        """Yes, one exists, used to die at one stop for both "install it" and "build ours"."""
+        project = model.parse(support.example_data("workflow-project"))
+        part = project.parts[0]
+        edges = {(e.source, e.target) for e in part.edges}
+        self.assertIn(("exists", "build"), edges)
+        self.assertIn(("build", "ready"), edges)
+        self.assertIn(("build", "install"), edges)
+        self.assertEqual(part.by_id["install"].type, "stop")
+        self.assertEqual(part.by_id["build"].branches[0], ("Yes", "ready"))
+        self.assertEqual(part.by_id["ready"].to_part, 2)
+        self.assertEqual(project.parts[1].by_id["ask"].type, "step")
+
     def test_steps_are_numbered_in_reading_order(self):
         part = model.parse(support.example_data("leave-request")).parts[0]
         self.assertEqual([n.number for n in part.nodes if n.type == "step"], [1, 2, 3, 4, 5])
