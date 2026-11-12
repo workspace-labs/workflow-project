@@ -2,23 +2,17 @@
 
 | What | Source | Licence |
 |---|---|---|
-| Plus Jakarta Sans, five static cuts (Regular, Medium, SemiBold, Bold, ExtraBold), in `skills/workflow-project/assets/fonts/` | Tokotype, https://github.com/tokotype/PlusJakartaSans (`fonts/ttf/`, downloaded 2026-09-25) | SIL Open Font License 1.1, full text in `assets/fonts/OFL.txt` |
-| Noto Naskh Arabic, four static cuts (Regular, Medium, SemiBold, Bold), in `skills/workflow-project/assets/fonts/` | The Noto Project Authors, https://github.com/notofonts/notofonts.github.io (`fonts/NotoNaskhArabic/hinted/ttf/`, downloaded 2026-10-03); licence text from https://github.com/notofonts/arabic | SIL Open Font License 1.1, full text in `assets/fonts/OFL-NotoNaskhArabic.txt` |
+| Alexandria, five static cuts (Regular, Medium, SemiBold, Bold, ExtraBold), in `skills/workflow-project/assets/fonts/`. One family draws English and Arabic. | The Alexandria Project Authors, https://github.com/Gue3bara/Alexandria; the variable font from https://github.com/google/fonts (`ofl/alexandria/`, downloaded 2026-11-12), cut into static weights 400 to 800 with fontTools (`varLib.instancer`), nothing else changed | SIL Open Font License 1.1, full text in `assets/fonts/OFL-Alexandria.txt`; no Reserved Font Name is declared |
 | The logo mark, `skills/workflow-project/assets/logo-mark.png` | WorkSpace Labs' own artwork (copied from the Workspace app's `assets/logo-mark.png`); named by `assets/brand.json` | owned by WorkSpace Labs; another user replaces it with their own |
 
-File fingerprints (SHA-256, first 16 characters) at download:
+File fingerprints (SHA-256, first 16 characters) as shipped:
 
 | File | SHA-256 |
 |---|---|
-| PlusJakartaSans-Regular.ttf | bd6276d4060e3b1e |
-| PlusJakartaSans-Medium.ttf | c77bab757d7402ec |
-| PlusJakartaSans-SemiBold.ttf | 65dbcedb6596a41c |
-| PlusJakartaSans-Bold.ttf | 5f5342ef76862b5b |
-| PlusJakartaSans-ExtraBold.ttf | 7d60d21b5dec501c |
-| OFL.txt | 995c7199cab65954 |
-| NotoNaskhArabic-Regular.ttf | 6f0a92031367b2f5 |
-| NotoNaskhArabic-Medium.ttf | ab1b4aa0f0856f0a |
-| NotoNaskhArabic-SemiBold.ttf | 76616e51f5ff1cf4 |
-| NotoNaskhArabic-Bold.ttf | 04017b0ccdd1156d |
-| OFL-NotoNaskhArabic.txt | a7a5a25eb188bf1c |
+| Alexandria-Regular.ttf | 1c4e3afecb4a7cb3 |
+| Alexandria-Medium.ttf | 7518b6338ff129d4 |
+| Alexandria-SemiBold.ttf | 58561d20ccb22ea8 |
+| Alexandria-Bold.ttf | 4405cb4caa82c90d |
+| Alexandria-ExtraBold.ttf | 85bcb23559564512 |
+| OFL-Alexandria.txt | 56372aed19c2701f |
 | logo-mark.png | 2fd6e0fe38cb7368 |

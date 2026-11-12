@@ -63,12 +63,14 @@ def register_fonts():
 
 
 def missing_characters(text, code=language.DEFAULT):
-    """Characters the font cannot draw in that language (they would print as empty boxes)."""
+    """Characters that cannot be drawn in that language (they would print as empty boxes, or as Arabic
+    letters left unjoined: Arabic is only joined and ordered in a right-to-left language)."""
     register_fonts()
-    cannot_join = set()
     if language.load(code)["direction"] == "rtl":
-        cannot_join = set(script.unsupported(text))
-    return sorted({ch for ch in text if not ch.isspace() and (ch in cannot_join or ord(ch) not in _cmap)})
+        refused = set(script.unsupported(text))
+    else:
+        refused = set(ch for ch in text if script.is_arabic(ch))
+    return sorted({ch for ch in text if not ch.isspace() and (ch in refused or ord(ch) not in _cmap)})
 
 
 @functools.lru_cache(maxsize=8192)

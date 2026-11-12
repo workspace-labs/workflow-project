@@ -3,9 +3,9 @@
     "name": "The Workflow Project skill",
     "accent": "Workflow",
     "prepared_by": "WorkSpace Labs",
-    "date": "2026-09-25",
-    "version": "0.2.1",
-    "summary": "A skill for every AI agent. When someone asks for a new project or a new skill, the agent first understands it, then draws how it will work from A to Z as a clean workflow PDF, before anything is built.",
+    "date": "2026-11-12",
+    "version": "0.4.0",
+    "summary": "A skill for every AI agent. When someone asks for a new project or a new skill, the agent first understands it, then draws how it will work from A to Z as a clean workflow PDF, before anything is built. For a project that is already built, it reads the project first and draws how it works today.",
     "actors": [
       {"name": "You", "role": "The person who asks for the project and says yes."},
       {"name": "The AI", "role": "The agent that plans or builds it: Claude, Codex, Grok, ChatGPT or another."},
@@ -17,7 +17,7 @@
   "parts": [
     {
       "title": "What was asked",
-      "summary": "A new project goes straight on. A new skill is looked up first, then you build ours or install the one that exists.",
+      "summary": "A new project goes straight on, and a built one is read first. A new skill is looked up first, then you build ours or install the one that exists.",
       "lanes": ["You", "The AI"],
       "nodes": [
         {"id": "start", "type": "start", "lane": "You", "title": "Asks for something new"},

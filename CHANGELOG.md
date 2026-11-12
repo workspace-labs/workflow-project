@@ -3,6 +3,46 @@
 All notable changes to this project. The version is `VERSION` in
 `skills/workflow-project/scripts/workflow_tool/__init__.py`.
 
+## [0.4.0] - 2026-11-12
+
+The Board look, chosen by the owner from three looks drawn on a real project (2026-11-12). Before 1.0.0 a
+minor version may replace things: this one replaces the whole look and the page order.
+
+### Changed
+
+- **Pages lie sideways** (A4 landscape) and each part takes **one page** instead of two. Its lanes are rows
+  and time runs across. The table of steps is gone: a strip under the lanes says what comes out of every
+  step and where every answer leads. A five-part project is 7 or 8 pages where it was 13.
+- **A step sits under the one before it**, in the same column, when the work passes straight down to a
+  lower lane, so boxes stay wide enough for real sentences.
+- **Starts, stops and ends are written out** ("Starts when: …", "Ends: …"): as a flag on a step's box when
+  they belong to it, as a small pill with its own arrow when they do not. A decision is an amber box
+  marked "?", no longer a diamond.
+- **A dark cover** with every part on one path, and the line "Every step and every decision, on N pages."
+- **The map** now carries who takes part, every part as a card with its page, and, when they fit, what was
+  assumed and what is still to confirm. The separate "project on one page" and the end card are gone; when
+  the two lists do not fit under the map they get a last page of their own.
+- **One font, Alexandria**, for English and Arabic (the owner's pick, 2026-11-12). Plus Jakarta Sans and Noto
+  Naskh Arabic are removed. Arabic is no longer drawn larger than the Latin beside it.
+- The brand's website is written on the cover's top line (it was on the end card).
+- The skill now also covers a project that is **already built**: read it first, then draw how it works today
+  (`SKILL.md`, `references/understanding.md`).
+- New limits: a page holds about 8 columns and up to 5 lanes; with 4 or 5 lanes titles must be short. The
+  `building-permit` example had one part too big for the new page and is now five parts.
+- The project's `accent` word is still accepted but no longer drawn.
+
+### Fixed
+
+- A letter standing alone is drawn as the plain letter, so Arabic no longer depends on a font carrying the
+  "isolated" copies of every letter.
+- Arabic letters in a workflow that is not Arabic are refused by rule, now that the font could draw them
+  (unjoined and in the wrong order).
+
+### Removed
+
+- `workflow_tool/richtext.py` and the platypus page flow: every page is drawn at fixed places, so each
+  part's page number is known before anything is drawn.
+
 ## [0.3.0] - 2026-10-03
 
 ### Added

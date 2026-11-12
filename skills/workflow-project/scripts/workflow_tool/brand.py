@@ -20,7 +20,7 @@ class Brand(object):
     def __init__(self, name, accent, website, logo):
         self.name = name          # shown beside the logo on every page, and as "Prepared by" by default
         self.accent = accent      # one word of the name drawn in blue, or "" for none
-        self.website = website    # the last line of the end card, or "" for none
+        self.website = website    # on the cover's top line, or "" for none
         self.logo = logo          # full path to the logo picture, or "" for none
 
 

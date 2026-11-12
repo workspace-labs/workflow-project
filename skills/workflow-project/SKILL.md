@@ -1,6 +1,6 @@
 ---
 name: workflow-project
-description: "Use when someone asks for a NEW project or a NEW agent skill (an app, website, system, tool, service or skill), before anything is built: first understand it, then produce its workflow, a professional PDF showing how it works from A to Z (the whole project as a map, then one swimlane page per part: who does what, every step, every decision, where a request stops), drawn in one fixed, clean house look by the skill's own tool. Also when asked for a project's workflow, process map or swimlane diagram. Not for fixes or small changes, not for a plan of how or when it will be built, and not for running several agents at once (some agents call that a workflow)."
+description: "Use when someone asks for a NEW project or a NEW agent skill (an app, website, system, tool, service or skill), before anything is built: first understand it, then produce its workflow, a professional PDF showing how it works from A to Z (the whole project as a map, then one page per part: who does what, every step, every decision, where a request stops, what comes out), drawn in one fixed, clean house look by the skill's own tool. Also when asked for the workflow, process map or swimlane diagram of a project, including one that is ALREADY built: read it first, then draw how it really works. Not for fixes or small changes, not for a plan of how or when it will be built, and not for running several agents at once (some agents call that a workflow)."
 ---
 
 # workflow-project
@@ -8,16 +8,18 @@ description: "Use when someone asks for a NEW project or a NEW agent skill (an a
 Companies and government offices expect the builder of a project to hand over its **workflow**: how
 the finished project works, from A to Z. This skill makes that document, the same way on every agent.
 
-**The PDF:** a cover · the project on one page · the map (every part as one box, with its page) ·
-for each part, a swimlane page (one column per person or system, a blue line for the normal path,
-dashed lines where it goes another way) followed by a table of every step · the end card. It grows
-with the project: 5 pages for a small one, 40 for a big one. **No dashboard**: no number tiles, no
-charts.
+**The PDF** lies sideways (A4 landscape): a cover with every part on one path · the map (who takes part,
+every part as one box with its page, what was assumed and what is still to confirm) · then **one page
+per part**: a board with one row per person or system, time running across, a blue line for the normal
+path, dashed lines where it goes another way, and under it a strip saying what comes out of every step.
+It grows with the project: 3 pages for a small one, a page more for every part. **No dashboard**: no
+number tiles, no charts.
 
 ## When
 
 - Someone asks for a **new project** or a **new skill**. Make the workflow before building anything.
 - Someone asks for a project's workflow, process map or swimlane.
+- The project is **already built**. Draw how it really works today, not how it was planned.
 - **Not** for fixes, small changes, or a plan of the build's stages and dates. **Not** for running
   several agents at once: in some agents "use a workflow" means that, and this skill is not it.
 - A workflow for this project **already exists** (for example, linked from the plan)? Read it and build
@@ -30,6 +32,9 @@ Never draw a guess.
 - **A new skill?** First check whether one already exists: the skills already installed, and the
   public skills directory (for example `npx skills find <words>`, where that command exists). If one
   exists, tell the person and let them choose. Map only a skill that will be built.
+- **An already built project?** Read it before you ask anything: its README and docs, its screens or
+  routes, and the code that does the work. Map what it does today. Ask the person only what the project
+  cannot tell you, and put anything you could not confirm into `open_questions`.
 - **Ask until you understand.** The questions are in [references/understanding.md](references/understanding.md).
   Ask in rounds: each answer can open a sharper question. If a clarifying-questions skill is installed
   (such as `prompt-guard`), use it for the asking.
@@ -44,12 +49,13 @@ Write the workflow as a JSON file. The full format and its rules are in
 `workflow-project.json` (this skill's own workflow).
 
 - **Parts** are the main stages, in the order they happen: that is the A to Z.
-- **Actors** are every person, team or system, each with a one-line role. A part uses 1 to 5 of them as lanes.
+- **Actors** are every person, team or system, each with a one-line role. A part uses 1 to 5 of them as
+  lanes; two to four read best.
 - **Nodes** in the order they happen: a start, the steps and decisions, and at least one end. A stop is
   where it ends early. `next` sends the flow somewhere other than the following node (loops, jumps).
 - **The first answer of every decision is the normal path**, drawn blue. It must reach an end.
 - **Short words.** A step is a few words with the verb first ("Checks the form"). A question is a few
-  words ("Approved?").
+  words ("Approved?"). A step's `result` is what comes out of it, in a few words ("A signed form").
 - **Their language.** English is the default. For an Arabic workflow, write every word of the file in
   Arabic and add `"language": "ar"` to the project (example: `examples/leave-request-ar.json`). The tool
   then writes its own words in Arabic too and mirrors every page, so it reads right to left.
@@ -64,7 +70,7 @@ python3 <this skill's folder>/scripts/draw_workflow.py workflow.json -o "<Projec
   it. Anywhere else: `pip install reportlab`, and ask first if your rules say installs need approval.
 - It checks everything before drawing: the file, every word against the place it is drawn, every arrow
   against every box and every other arrow. If it refuses, it lists numbered reasons. **Change exactly those in the file and run it
-  again.** If a part is "too long for one page", split it into two parts.
+  again.** If a part is "too long" or "too tall" for one page, split it into two parts.
 - **Never** draw the diagram yourself to get around a refusal, and never edit the tool to silence one.
   A messy workflow is worse than none.
 - `--check` runs every check without drawing.
@@ -85,9 +91,10 @@ plainly when you hand it over.
 
 ## The look is fixed; the brand is yours
 
-The tool draws one house look: Plus Jakarta Sans (Noto Naskh Arabic for Arabic words), a light ground, one
-blue accent word, red only for a stop, the full-grid step table, and an end card. Never restyle the PDF, swap its fonts or colours, or
-add charts, number tiles or dashboards.
+The tool draws one house look, the Board: pages lying sideways, a dark cover, white pages with ink-dark
+rules, one blue for the normal path, amber for a question, red only for a stop, and one font, Alexandria,
+for English and Arabic. Never restyle the PDF, swap its fonts or colours, or add charts, number tiles or
+dashboards.
 
 Whose **name, logo and website** the PDF carries comes from `assets/brand.json` (WorkSpace Labs by
 default). To use your own brand, edit that file and put your logo beside it:
@@ -96,7 +103,8 @@ default). To use your own brand, edit that file and put your logo beside it:
 {"name": "Acme Studio", "accent": "Studio", "website": "acme.example", "logo": "acme-logo.png"}
 ```
 
-`accent` is one word of the name drawn in blue (or `""` for none); `logo` and `website` may be `""`.
+`accent` is one word of the name drawn in blue (or `""` for none); `logo` and `website` may be `""`. The
+website is written on the cover's top line.
 Only change the brand when the person asks for their own; the tool refuses a broken brand file.
 
 ## Limits
@@ -108,10 +116,11 @@ Say these when they matter:
 - Arabic vowel marks (tashkeel) are drawn, but only roughly centred on their letter. Leave them out
   unless a word needs one.
 - The brand name and website in `assets/brand.json` must be in Latin letters.
-- A single word too wide for where it is drawn (a lane heading, the table's "Who" column, the cover, the
-  map) is refused: add a space or shorten it.
-- A4 portrait. Up to 5 lanes and about 9 to 10 rows per part: split bigger parts. Up to 3 answers per
-  decision.
+- A single word too wide for where it is drawn (a lane name, a box, the cover, the map) is refused: add a
+  space or shorten it.
+- A4 landscape, one page per part. A page holds about 8 columns of boxes (a step that follows the one
+  above it in a lower lane shares its column) and up to 5 lanes; with 4 or 5 lanes keep titles short.
+  Split bigger parts. Up to 3 answers per decision.
 - On the map, parts follow one another in order.
 
 ## Files
@@ -122,4 +131,4 @@ Say these when they matter:
 | `references/workflow-format.md` | the file format and its rules |
 | `references/understanding.md` | the questions to ask before mapping |
 | `examples/` | four complete workflow files, one of them in Arabic |
-| `assets/` | the fonts, Plus Jakarta Sans and Noto Naskh Arabic (SIL Open Font License, `assets/fonts/OFL*.txt`), the words of each language (`assets/languages/`), `brand.json` and the logo |
+| `assets/` | the font, Alexandria (SIL Open Font License, `assets/fonts/OFL-Alexandria.txt`), the words of each language (`assets/languages/`), `brand.json` and the logo |

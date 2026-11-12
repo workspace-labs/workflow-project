@@ -23,7 +23,7 @@ TOOL = os.path.join(support.SCRIPTS, "draw_workflow.py")
 ARABIC = {"leave-request-ar": os.path.join(support.EXAMPLES, "leave-request-ar.json"),
           "building-permit-ar": os.path.join(FIXTURES, "building-permit-ar.json")}
 INK = 0.2      # the inked part of an Arabic word: its box less a fifth at the top and at the bottom (see pdf_words)
-SAME_PAGES_AS = {"leave-request-ar": 5, "building-permit-ar": 11}      # their English twins' page counts
+SAME_PAGES_AS = {"leave-request-ar": 3, "building-permit-ar": 8}      # their English twins' page counts
 
 
 def drawn(text):
@@ -100,16 +100,16 @@ class Joining(unittest.TestCase):
         self.assertEqual(drawn("بيت"), "ﺖﻴﺑ")
 
     def test_letters_that_never_reach_forward_stay_apart(self):
-        # dal, alef and reh do not join the letter after them
-        self.assertEqual(drawn("دار"), "ﺭﺍﺩ")
+        # dal, alef and reh do not join the letter after them; a letter standing alone stays the plain letter
+        self.assertEqual(drawn("\u062f\u0627\u0631"), "\u0631\u0627\u062f")
 
     def test_lam_and_alef_become_one_shape(self):
         # seen starts, lam + alef is one end shape, meem stands alone
-        self.assertEqual(drawn("سلام"), "ﻡﻼﺳ")
+        self.assertEqual(drawn("\u0633\u0644\u0627\u0645"), "\u0645\ufefc\ufeb3")
 
     def test_a_mark_comes_just_before_its_letter(self):
-        found = drawn("بّ")
-        self.assertEqual(found, "ّﺏ")
+        found = drawn("\u0628\u0651")
+        self.assertEqual(found, "\u0651\u0628")
 
 
 class Ordering(unittest.TestCase):
@@ -175,13 +175,15 @@ class ArabicPdf(unittest.TestCase):
             self.assertEqual(sides, {"ar": True, "en": False}, "the brand moves to the right-hand side in Arabic")
 
     def test_the_arabic_font_is_inside_and_nothing_falls_back(self):
+        import test_render
         with tempfile.TemporaryDirectory() as folder:
             out = os.path.join(folder, "ar.pdf")
             self.assertEqual(draw(ARABIC["leave-request-ar"], out).returncode, 0)
             with open(out, "rb") as handle:
                 data = handle.read()
-        self.assertTrue(re.search(rb"\+NotoNaskhArabic-(Regular|Bold)", data), "the Arabic font is not embedded")
-        self.assertIn(b"+PlusJakartaSans-Bold", data, "Latin words keep the house font")
+        self.assertTrue(re.search(rb"\+Alexandria-(Regular|Bold)", data), "the house font is not embedded")
+        streams = test_render._page_streams(data)
+        self.assertEqual(test_render._text_shown_in(streams, b"F1"), 0, "some text fell back to Helvetica")
 
     def test_an_english_workflow_after_an_arabic_one_is_english(self):
         import test_render
@@ -190,7 +192,7 @@ class ArabicPdf(unittest.TestCase):
             self.assertEqual(test_render._draw_here(ARABIC["leave-request-ar"], first)[0], 0)
             self.assertEqual(test_render._draw_here(os.path.join(support.EXAMPLES, "leave-request.json"), second)[0], 0)
             lines = [line for _, _, words in pdf_words.pages(second) for line in test_render._lines(words)]
-            self.assertTrue(any(re.search(r"Page 2 of 5", line) for line in lines), "the footer is not English")
+            self.assertTrue(any(re.search(r"Page 2 of 3", line) for line in lines), "the footer is not English")
         self.assertFalse(language.rtl())
         language.use(language.DEFAULT)
 

@@ -47,7 +47,8 @@ def draw_board(c, d, left, top):
 
     font, size, lead = theme.LANE_LABEL
     for (_, y0, y1), lines in zip(d.lanes, d.lane_lines):
-        _lines(c, lines, left + layout.LABEL_PAD, top - (y0 + y1) / 2.0, font, size, lead, theme.WHITE)
+        _lines(c, lines, left + layout.LABEL_PAD, top - (y0 + y1) / 2.0, font, d.lane_size,
+               lead * d.lane_size / size, theme.WHITE)
     words = layout.wrap(language.t("col_out"), font, size, layout.LABEL_W - 2 * layout.LABEL_PAD, 4) or []
     _lines(c, words, left + layout.LABEL_PAD, top - d.bottom - layout.STRIP_PAD - lead * len(words) / 2.0 - 2.0,
            font, size, lead, theme.INK)

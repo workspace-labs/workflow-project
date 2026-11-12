@@ -16,7 +16,7 @@ from . import language, theme
 from .model import TERMINALS, WorkflowError
 from .routing import ANSWER_PAD, Rect, RouteError, route_all
 
-LABEL_W = 78.0        # the dark column with the lane names
+LABEL_W = 96.0        # the dark column with the lane names
 LABEL_PAD = 9.0
 PAD_SIDE = 14.0       # room before the first column and after the last
 COL_GAP = 18.0        # room between two columns, where arrows bend
@@ -28,6 +28,7 @@ BOX_MIN, BOX_MOST = 62.0, 150.0
 PILL_SHARE = 0.85     # a start, stop or end on its own takes this much of a box's width
 BOX_PAD_X, BOX_PAD_TOP, BOX_PAD_BOTTOM = 8.0, 7.5, 6.5
 BOX_MIN_H = 30.0
+NAME_SIZES = (10.4, 9.4, 8.6)
 PILL_PAD_Y = 6.0
 DOT_ROOM = 12.0       # the round mark before a start, stop or end, and the air after it
 FLAG_GAP = 5.0        # between a flag and what is under it
@@ -114,6 +115,7 @@ class Diagram(object):
         self.strip_h = STRIP_MIN
         self.lanes = []                # [(name, y0, y1)]
         self.lane_lines = []           # each lane's name, wrapped
+        self.lane_size = theme.LANE_LABEL[1]    # the size all the names are written at
         self.placed = {}
         self.attached = {}             # the id of a start, stop or end drawn as a flag -> the id of its box
         self.columns = []
@@ -276,8 +278,8 @@ def _place_columns(diagram):
             continue
         mine = lanes_of(node.id)
         follows = before is not None and any(e.source == before.node.id and e.target == node.id for e in part.edges)
-        if not follows or not straight(node.id, mine, taken):
-            clear = False
+        if not follows or not straight(node.id, mine, taken) or len(node.branches) > 2:
+            clear = False        # three answers need three free sides: the arrow in must come from the left
         elif "pill" in (placed.shape, before.shape):
             clear = max(mine) < min(taken.values()) or min(mine) > max(taken.values())
         else:                       # a box shares a column only when the work passes straight down to it
@@ -361,14 +363,20 @@ def _channels(diagram):
 # ---------------------------------------------------------------- words
 
 def _name_lanes(diagram, problems):
+    """Wraps the lane names beside their lanes, all at one size: the largest at which every name fits."""
     part = diagram.part
-    font, size, _ = theme.LANE_LABEL
-    for name in part.lanes:
-        lines = wrap(name, font, size, LABEL_W - 2 * LABEL_PAD, NAME_LINES)
-        if lines is None:
+    font, _, _ = theme.LANE_LABEL
+    room = LABEL_W - 2 * LABEL_PAD
+    for size in NAME_SIZES:
+        lines = [wrap(name, font, size, room, NAME_LINES) for name in part.lanes]
+        if all(found is not None for found in lines):
+            break
+    for name, found in zip(part.lanes, lines):
+        if found is None:
             problems.append('Part %d ("%s"): the lane name "%s" does not fit beside its lane. Put a space '
                             'between its words, or use a shorter actor name.' % (part.number, part.title, name))
-        diagram.lane_lines.append(lines or [])
+    diagram.lane_size = size
+    diagram.lane_lines = [found or [] for found in lines]
 
 
 def _size(placed, part, problems):

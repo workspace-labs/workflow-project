@@ -18,14 +18,16 @@ import pdf_words
 import support
 from workflow_tool import brand, layout, model, pages
 
-EXPECTED_PAGES = {"leave-request": 5, "building-permit": 11, "workflow-project": 10}
+EXPECTED_PAGES = {"leave-request": 3, "building-permit": 8, "workflow-project": 6}
 TOOL = os.path.join(support.SCRIPTS, "draw_workflow.py")
 ENGLISH_DATE = "25 September 2026"
 
 
 def build(name, folder):
     project = model.parse(support.example_data(name))
-    diagrams = [layout.lay_out(p, pages.FRAME_W, pages.diagram_room(p, len(project.parts))) for p in project.parts]
+    where = pages.page_plan(project)
+    diagrams = [layout.lay_out(p, pages.FRAME_W, pages.board_room(p, len(project.parts)), where)
+                for p in project.parts]
     path = os.path.join(folder, name + ".pdf")
     found = pages.build(project, diagrams, path, brand.load())
     with open(path, "rb") as handle:
@@ -108,19 +110,35 @@ class WholePdf(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             project, found, _ = build("building-permit", folder)
         starts = [found[part.number] for part in project.parts]
-        self.assertEqual(starts, sorted(starts))
-        self.assertEqual(starts[0], 4, "cover, one page, map, then part 1")
-        self.assertLess(starts[-1], found["total"], "the end card comes after the last part")
+        self.assertEqual(starts, list(range(3, 3 + len(starts))), "cover, map, then one page for every part")
+        self.assertTrue(found["closing"], "what is still to confirm does not fit under this map")
+        self.assertEqual(starts[-1] + 1, found["total"], "so it gets the last page")
+
+    def test_what_is_still_to_confirm_sits_under_the_map_when_it_fits(self):
+        with tempfile.TemporaryDirectory() as folder:
+            project, found, _ = build("leave-request", folder)
+        self.assertTrue(project.open_questions)
+        self.assertFalse(found["closing"])
+        self.assertEqual(found["total"], 2 + len(project.parts))
+
+    @unittest.skipUnless(pdf_words.AVAILABLE, "pdftotext is not installed")
+    def test_every_page_lies_sideways_and_the_cover_counts_the_pages(self):
+        with tempfile.TemporaryDirectory() as folder:
+            _, found, _ = build("building-permit", folder)
+            drawn = pdf_words.pages(os.path.join(folder, "building-permit.pdf"))
+        for width, height, _ in drawn:
+            self.assertGreater(width, height)
+        self.assertTrue(any("on %d pages." % found["total"] in line for line in _lines(drawn[0][2])))
 
     def test_the_house_font_is_embedded_and_nothing_falls_back(self):
         with tempfile.TemporaryDirectory() as folder:
             _, _, data = build("leave-request", folder)
-        for face in (b"PlusJakartaSans-Regular", b"PlusJakartaSans-Bold", b"PlusJakartaSans-ExtraBold"):
+        for face in (b"Alexandria-Regular", b"Alexandria-Bold", b"Alexandria-ExtraBold"):
             self.assertIn(b"+" + face, data)
         self.assertEqual(data.count(b"/FontFile2"), 5, "all five weights are embedded")
         # reportlab always declares Helvetica as /F1 and selects it once per page; no text may be shown in it
         streams = _page_streams(data)
-        self.assertEqual(len(streams), 5, "one drawing stream per page")
+        self.assertEqual(len(streams), 3, "one drawing stream per page")
         self.assertEqual(_text_shown_in(streams, b"F1"), 0, "some text fell back to Helvetica")
         self.assertGreater(_text_shown_in(streams, None), 50, "the pages do show text")
 
@@ -167,7 +185,7 @@ class CommandLine(unittest.TestCase):
             target = os.path.join(folder, "out.pdf")
             code, out, _ = self.run_tool(os.path.join(support.EXAMPLES, "leave-request.json"), "-o", target)
             self.assertEqual(code, 0)
-            self.assertIn("Drew 5 pages", out)
+            self.assertIn("Drew 3 pages", out)
             self.assertTrue(os.path.getsize(target) > 10000)
 
     def test_a_broken_file_is_refused_with_numbered_reasons(self):

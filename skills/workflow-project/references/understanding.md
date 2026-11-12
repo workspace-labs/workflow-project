@@ -19,6 +19,18 @@ tool has them, always with a way to type their own answer.
 11. **What must never happen?** Rules that shape a step or a decision.
 12. **What is not part of it?** So nobody draws it in.
 
+## For a project that is already built
+
+Read first, ask second. The project answers most of the twelve questions above by itself.
+
+1. **Read what it says about itself:** the README, the docs, any earlier workflow or app flow.
+2. **Read what it really does:** the screens or routes a person meets, and the code behind each one.
+   Where the docs and the code disagree, the code is how it works today; note the difference.
+3. **Name the parts as its users would**, not as its folders are named.
+4. **Ask the person only what the project cannot tell you:** who uses it, which paths matter most, what
+   is about to change.
+5. **Anything you could not confirm** goes into `open_questions`, never into an invented step.
+
 ## For a new skill
 
 First check whether a skill that does the job already exists; map only one that will be built.
@@ -32,5 +44,5 @@ First check whether a skill that does the job already exists; map only one that 
 
 ## Never
 
-- Never fill a gap with a guess. Put it in `open_questions`; the one-page summary shows it as "Still to confirm".
+- Never fill a gap with a guess. Put it in `open_questions`; the map page shows it as "Still to confirm".
 - Never add a step, actor or decision the person did not describe or confirm.

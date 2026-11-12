@@ -30,7 +30,7 @@ done
 
 Copy `skills/workflow-project/assets/languages/en.json` to `<code>.json` and translate the values; keep
 every key and every `{blank}`. `tests/test_language.py` checks that. A left-to-right language needs nothing
-else if Plus Jakarta Sans has its letters. A right-to-left script other than Arabic needs its own font and
+else if Alexandria has its letters. A right-to-left script other than Arabic needs its own font and
 joining rules: that is a design decision, ask the owner.
 
 ## Rules for this repository
@@ -41,6 +41,7 @@ joining rules: that is a design decision, ask the owner.
   without his yes.
 - Geometry code never imports drawing code (see `docs/architecture/boundaries.md`).
 - Every change bumps `VERSION` in `workflow_tool/__init__.py` and adds a dated `CHANGELOG.md` entry.
+- Run the tool and the tests with a Python that has `reportlab` (on the owner's Mac: `/usr/bin/python3`).
 - After a change, rebuild `dist/workflow-project.zip` (command in `README.md`) and tell the owner it needs
   uploading again to the Claude app.
 - Never commit or push without the owner's word.

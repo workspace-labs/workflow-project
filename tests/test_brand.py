@@ -128,8 +128,7 @@ class WrongTypesAreRefused(BrandCopy, unittest.TestCase):
                 self.assertIn(b"/Author (Acme Studio)", pdf)
 
 
-WIDE_NAME = "W" * 40                # as long as the brand file allows, and wider than the bar at the top
-WIDE_SITE = "w" * 56 + ".org"       # 60 characters: as long as allowed, and wider than the last page
+WIDE_SITE = "w" * 56 + ".org"       # 60 characters: as long as allowed, and wider than its place on the cover
 TOP_BAR = 60.0                      # points from the top edge: the brand bar, above the page's content
 
 
@@ -156,17 +155,9 @@ class BrandTextMustFitThePage(BrandCopy, unittest.TestCase):
                 for field in allowed:
                     self.assertFalse(any('The brand "%s"' % field in line for line in numbered), result.stderr)
 
-    def test_a_name_too_wide_for_the_bar_at_the_top(self):
-        self.assertRefusedByField({"name": WIDE_NAME, "accent": "", "logo": "", "website": ""},
-                                  refused=["name"], allowed=["website"])
-
-    def test_a_website_too_wide_for_the_last_page(self):
+    def test_a_website_too_wide_for_the_cover(self):
         self.assertRefusedByField({"name": "Acme Studio", "accent": "Studio", "logo": "", "website": WIDE_SITE},
                                   refused=["website"], allowed=["name"])
-
-    def test_both_at_once_are_both_named(self):
-        self.assertRefusedByField({"name": WIDE_NAME, "accent": "", "logo": "", "website": WIDE_SITE},
-                                  refused=["name", "website"], allowed=[])
 
     def test_brands_that_fit_are_drawn_in_both_routes(self):
         controls = [  # (brand file, None = ours; the name's words; the website, None = no website line)
@@ -188,12 +179,12 @@ class BrandTextMustFitThePage(BrandCopy, unittest.TestCase):
                 if not pdf_words.AVAILABLE:
                     continue
                 pages = pdf_words.pages(pdfs[0])
-                for number, (_, _, words) in enumerate(pages[:-1], 1):
+                for number, (_, _, words) in enumerate(pages, 1):
                     bar = [word[4] for word in words if word[1] < TOP_BAR]
                     for part in name_words:
                         self.assertIn(part, bar, "page %d: the bar at the top shows the brand name" % number)
-                self.assertEqual(pages[-1][2][-1][4], website or name_words[-1] + ".",
-                                 "the last page ends with the website, or with the name when there is none")
+                    self.assertEqual(website in bar, bool(website) and number == 1,
+                                     "page %d: the website is on the cover's top line, and nowhere else" % number)
                 shown = set(word[4] for _, _, words in pages for word in words)
                 self.assertEqual(shown & ({"WorkSpace", "Acme"} - set(name_words)), set(), "only this brand")
                 self.assertEqual(pdf_words.problems(pdfs[0]), [])

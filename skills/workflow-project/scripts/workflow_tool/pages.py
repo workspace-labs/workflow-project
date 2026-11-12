@@ -30,6 +30,7 @@ TITLE_SIZES = (25.5, 21.0, 18.0)
 LEDE = (theme.REGULAR, 11.0, 15.0)
 LEDE_W = FRAME_W - 120.0
 FOOTER = (theme.REGULAR, 8.2)
+WEBSITE = (theme.REGULAR, 8.6)
 FOOTER_ROOM = FRAME_W - 110.0       # the footer's left text, clear of "Page n of N"
 COVER_X = 39.0
 COVER_W = PAGE_W - 2 * COVER_X
@@ -133,11 +134,17 @@ def _rail(c, brand, x, right, y, on_dark=False):
     c.setFillColor(ink if on_dark else theme.INK_SOFT)
     c.setFont(font, size)
     c.drawCentredString(right - w / 2.0, y - size * 0.34, t("tag"))
+    if on_dark and brand.website:       # the cover also says where to find whoever made this
+        c.setFillColor(theme.COVER_SOFT)
+        c.setFont(*WEBSITE)
+        c.drawRightString(right - w - 14.0, y - WEBSITE[1] * 0.34, brand.website)
 
 
-def _rail_room(brand):
+def _website_room(brand):
+    """How wide the website may be on the cover's top line, beside the brand name and the tag."""
+    name = (22.0 if brand.logo else 0.0) + theme.width(brand.name, theme.BOLD, 9.8)
     tag = theme.width(t("tag"), theme.SEMIBOLD, 8.6) + 22.0
-    return FRAME_W - (22.0 if brand.logo else 0.0) - tag - 14.0
+    return min(COVER_W - name - tag - 2 * 14.0, 260.0)
 
 
 def _footer_text(project):
@@ -193,10 +200,10 @@ def _plan_cover(project, brand, total):
     plan["fact_w"] = min(COVER_W / len(facts), 190.0)
     plan["facts"] = []
     for label, value in facts:
-        lines = _wrap(value, theme.BOLD, 10.2, plan["fact_w"] - 22.0, 2)
+        lines = _wrap(value, theme.BOLD, 10.2, plan["fact_w"] - 22.0, 4)
         if lines is None:
             problems.append(_refusal('The cover\'s "%s" line ("%s")' % (label, _shown(value)), value, theme.BOLD,
-                                     10.2, plan["fact_w"] - 22.0, "the cover in two lines"))
+                                     10.2, plan["fact_w"] - 22.0, "the cover in four lines"))
         plan["facts"].append((label, lines or []))
 
     parts = project.parts if 1 < len(project.parts) <= PATH_MOST else []
@@ -298,33 +305,19 @@ def _plan_map(project):
                              for row in plan["actor_rows"]]
 
     count = len(project.parts)
-    per_row = count if count <= 6 else int(math.ceil(count / math.ceil(count / 6.0)))
-    width = min((FRAME_W - CARD_GAP * (per_row - 1)) / per_row, 230.0)
+    most = count if count <= 6 else int(math.ceil(count / math.ceil(count / 6.0)))
+    for per_row in range(most, 0, -1):          # as many side by side as their words allow
+        width = min((FRAME_W - CARD_GAP * (per_row - 1)) / per_row, 230.0)
+        cards = [_part_card_plan(part, width, colours) for part in project.parts]
+        if all(card["fits"] for card in cards) or per_row <= min(most, 3):
+            break
     plan["card_w"] = width
-    rows = []
-    for index, part in enumerate(project.parts):
-        room = width - 28.0
-        title = _wrap(part.title, theme.BOLD, 13.5, room, 3)
-        summary = _wrap(part.summary, theme.REGULAR, 9.6, room, 9) if part.summary else []
-        chips, x = [[]], 0.0
-        for lane in part.lanes:
-            chip = theme.width(lane, theme.SEMIBOLD, 8.2) + 21.0
-            if chip > room:
-                title = None
-            if chips[-1] and x + chip > room:
-                chips.append([])
-                x = 0.0
-            chips[-1].append((x, chip, lane, colours.get(lane, theme.INK_SOFT)))
-            x += chip + 4.0
-        if title is None or summary is None:
+    for card in cards:
+        if not card["fits"]:
             problems.append('Part %d ("%s") does not fit its box on the map: its title must fit three lines and '
                             'its summary nine, with no word or lane name wider than the box. Shorten them, or break '
-                            'long words with spaces.' % (part.number, _shown(part.title)))
-            title, summary = title or [], summary or []
-        height = 14.0 + 38.0 + 16.5 * len(title) + 4.0 + 12.6 * len(summary) + 8.0 + 16.0 * len(chips) + 8.0 + 27.0
-        if index % per_row == 0:
-            rows.append([])
-        rows[-1].append({"part": part, "title": title, "summary": summary, "chips": chips, "height": height})
+                            'long words with spaces.' % (card["part"].number, _shown(card["part"].title)))
+    rows = [cards[i:i + per_row] for i in range(0, len(cards), per_row)]
 
     # cut the rows of cards into pages
     first_room = (BODY_TOP - _heading_height(plan["sub"]) - 20.0 - sum(plan["actor_heights"])
@@ -344,6 +337,25 @@ def _plan_map(project):
         used += height + CARD_GAP
     plan["pages"].append((page, room, used))
     return plan, problems
+
+
+def _part_card_plan(part, width, colours):
+    """One part's card on the map: its wrapped words, its lane chips in rows, and its height."""
+    room = width - 28.0
+    title = _wrap(part.title, theme.BOLD, 13.5, room, 3)
+    summary = _wrap(part.summary, theme.REGULAR, 9.6, room, 9) if part.summary else []
+    chips, x, fits = [[]], 0.0, title is not None and summary is not None
+    for lane in part.lanes:
+        chip = theme.width(lane, theme.SEMIBOLD, 8.2) + 21.0
+        fits = fits and chip <= room
+        if chips[-1] and x + chip > room:
+            chips.append([])
+            x = 0.0
+        chips[-1].append((x, chip, lane, colours.get(lane, theme.INK_SOFT)))
+        x += chip + 4.0
+    title, summary = title or [], summary or []
+    height = 14.0 + 38.0 + 16.5 * len(title) + 4.0 + 12.6 * len(summary) + 8.0 + 16.0 * len(chips) + 8.0 + 27.0
+    return {"part": part, "title": title, "summary": summary, "chips": chips, "height": height, "fits": fits}
 
 
 def _draw_map_page(c, project, plan, index, part_pages, closing=None):
@@ -544,9 +556,9 @@ def preflight(project, brand):
     if _footer_text(project) is None:
         problems.append(_refusal('The project\'s "name"', project.name, FOOTER[0], FOOTER[1], FOOTER_ROOM,
                                  "the page footer"))
-    if theme.width(brand.name, theme.BOLD, 9.8) > _rail_room(brand):
-        problems.append('The brand "name" ("%s") in assets/brand.json does not fit the line at the top of the pages '
-                        'beside the Workflow tag. Use a shorter name.' % _shown(brand.name))
+    if brand.website and theme.width(brand.website, *WEBSITE) > _website_room(brand):
+        problems.append('The brand "website" ("%s") in assets/brand.json is too wide for the top of the cover, '
+                        'beside the brand name. Use a shorter address.' % _shown(brand.website))
     return problems
 
 

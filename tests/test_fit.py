@@ -61,12 +61,12 @@ class Refused(unittest.TestCase):
                 self.assertIsNone(pdf)
 
     def test_f02_actor_name_too_wide_for_its_lane(self):
-        self.assertRefused(fixture("long-actor"), 'the lane name "CommunicationsDepartment" does not fit its column')
+        self.assertRefused(fixture("long-actor"), 'the lane name "CommunicationsDepartment" does not fit beside its lane')
 
-    def test_f02_actor_name_fits_its_lane_but_not_the_table(self):
+    def test_f02_actor_role_too_long_for_its_card_on_the_map(self):
         data = support.small_workflow()
-        data = rename_actor(data, "Office", "CommunicationsDepartment")
-        self.assertRefused(data, 'The actor name "CommunicationsDepartment" does not fit the "Who" column')
+        data["project"]["actors"][0]["role"] = "W" * 60
+        self.assertRefused(data, 'The actor "Customer" does not fit its card on the map')
 
     def test_f03_project_name_with_one_giant_word(self):
         self.assertRefused(fixture("long-project-word"), 'The project\'s "name" does not fit the cover')

@@ -4,6 +4,10 @@
   2026-10-03; how it is built is the builder's decision inside that)
 - Deciders: the owner (one skill not two, Arabic first, Noto Naskh Arabic); Claude (builder) for the rest.
 
+> **Amended 2026-11-12 (0.4.0):** point 4 below no longer holds. The owner chose Alexandria, one family for
+> Arabic and Latin, with the Board look (ADR 0003); nothing is drawn larger any more, and a letter standing
+> alone is drawn as the plain letter. Points 1 to 3 stand.
+
 ## Context
 
 The owner wants the workflow PDF in Arabic, and later in other languages, from every agent. reportlab
