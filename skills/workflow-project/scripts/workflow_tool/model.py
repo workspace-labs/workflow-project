@@ -9,7 +9,7 @@ import datetime
 import json
 import re
 
-from . import theme
+from . import language, script, theme
 
 NODE_TYPES = ("start", "step", "decision", "end", "stop")
 TERMINALS = ("end", "stop")
@@ -19,7 +19,7 @@ MAX_LIST_ITEMS = 8
 
 _TOP_KEYS = {"project", "parts"}
 _PROJECT_KEYS = {"name", "accent", "client", "prepared_by", "date", "version", "status", "summary",
-                 "actors", "assumptions", "open_questions"}
+                 "actors", "assumptions", "open_questions", "language"}
 _PART_KEYS = {"title", "summary", "lanes", "nodes"}
 _NODE_KEYS = {
     "start": {"id", "type", "lane", "title", "next"},
@@ -83,6 +83,7 @@ class Part(object):
 class Project(object):
     def __init__(self):
         self.name = ""
+        self.language = language.DEFAULT      # which assets/languages file the PDF's fixed words come from
         self.accent = ""
         self.client = ""
         self.prepared_by = ""
@@ -141,11 +142,16 @@ def parse(data):
                 problems.append('%s: "to_part" must be the number of another part (1 to %d).'
                                 % (_where(part, node), len(raw_parts)))
 
-    missing = sorted(set(ch for text in _all_text(data) for ch in theme.missing_characters(text)))
+    missing = sorted(set(ch for text in _all_text(data) for ch in theme.missing_characters(text, project.language)))
     if missing:
-        problems.append("Some text uses characters the house font cannot draw: %s. The workflow PDF "
-                        "supports English text only for now; replace them."
-                        % ", ".join('"%s"' % ch for ch in missing[:12]))
+        if language.load(project.language)["direction"] == "rtl":
+            advice = "Arabic letters, Latin letters and numbers can be drawn; replace the others."
+        elif any(script.is_arabic(ch) for ch in missing):
+            advice = 'For an Arabic workflow, add "language": "ar" to the project; otherwise replace them.'
+        else:
+            advice = "Replace them."
+        problems.append("Some text uses characters the house font cannot draw: %s. %s"
+                        % (", ".join('"%s"' % ch for ch in missing[:12]), advice))
 
     if problems:
         raise WorkflowError(problems)
@@ -160,6 +166,12 @@ def _parse_project(raw, problems):
         problems.append('Add "project": an object with at least "name", "summary" and "actors".')
         return project
     _unknown_keys(raw, _PROJECT_KEYS, "The project", problems)
+    code = raw.get("language", language.DEFAULT)
+    if isinstance(code, str) and code in language.available():
+        project.language = code
+    else:
+        problems.append('The project\'s "language" must be one of: %s (the default is "%s").'
+                        % (", ".join('"%s"' % c for c in language.available()), language.DEFAULT))
     project.name = _text(raw.get("name"), 'The project\'s "name"', problems, limit=70)
     project.accent = _text(raw.get("accent"), 'The project\'s "accent"', problems, required=False, limit=30)
     if project.name and project.accent and project.accent not in project.name.split():
@@ -173,7 +185,7 @@ def _parse_project(raw, problems):
         or datetime.date.today().isoformat()
     project.version = _text(raw.get("version"), 'The project\'s "version"', problems, required=False, limit=20) or "1.0"
     project.status = _text(raw.get("status"), 'The project\'s "status"', problems, required=False, limit=40) \
-        or "Draft for review"
+        or language.load(project.language)["words"]["status_default"]
     project.summary = _text(raw.get("summary"), 'The project\'s "summary" (what it is, in 2 or 3 sentences)',
                             problems, limit=700)
     project.actors = _parse_actors(raw.get("actors"), problems)

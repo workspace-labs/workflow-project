@@ -1,5 +1,7 @@
 """Draws each arrow as right-angled lines that go around the boxes, never through them.
 
+The work runs across the page: an arrow likes to leave a box on its right and arrive on the left.
+
 For every arrow, routes with 0 to 4 bends are tried between the free sides of its two nodes. A
 route is kept only if it touches no other node and no label, and comes no closer than ARROW_GAP to
 any earlier arrow: arrows never touch or cross. The cheapest kept route wins (fewest bends, then
@@ -11,17 +13,19 @@ Coordinates are points from the diagram's top-left corner; y grows downward.
 from . import theme
 
 STUB_OUT = 7.0        # an arrow leaves its node straight for at least this long
-STUB_IN = 8.0         # and arrives straight for at least this long, so the arrowhead shows
+STUB_IN = 9.0         # and arrives straight for at least this long, so the arrowhead shows
 CLEARANCE = 3.0       # how close a line may pass to a box
 ARROW_GAP = 3.0       # two different arrows never touch, cross, or run closer than this
+ANSWER_PAD, ANSWER_H = 4.0, 9.6      # a decision's answer sits in a small pill this much wider than its word
 SIDES = {"top": (0, -1), "bottom": (0, 1), "left": (-1, 0), "right": (1, 0)}
 
-# What a route costs. A decision's sides belong to its answers, so an arrow entering one from the
-# side costs more than an extra bend; long detours around the diagram cost more than a bend too.
+# What a route costs. A decision's top, bottom and right belong to its answers, so an arrow entering
+# one anywhere but its left costs more than an extra bend; long detours around the diagram cost more than a bend too.
 # A route that touches or crosses another arrow is never allowed at any cost (review finding F01).
 BEND = 30.0
 PER_POINT = 0.12
 DECISION_SIDE_ENTRY = 45.0
+SIDE_RANK = 8.0        # leaving by a less-liked side costs this much per place down the list
 
 
 class Rect(object):
@@ -53,15 +57,12 @@ class Routed(object):
     def __init__(self, edge, points, label_at=None):
         self.edge = edge
         self.points = points       # [(x, y), ...] from the source's side to the target's side
-        self.label_at = label_at   # (x, y, "start" | "end") for a decision's answer, or None
+        self.label_at = label_at   # the Rect of the small pill holding a decision's answer, or None
         self.main = edge.main
 
 
 def port(placed, side):
     """Where an arrow meets a node on the given side."""
-    if placed.shape == "circle":
-        dx, dy = SIDES[side]
-        return (placed.cx + dx * placed.r, placed.cy + dy * placed.r)
     half_w, half_h = placed.w / 2.0, placed.h / 2.0
     dx, dy = SIDES[side]
     return (placed.cx + dx * half_w, placed.cy + dy * half_h)
@@ -79,9 +80,8 @@ def route_all(diagram, edges):
     Arrows are routed one by one, and each takes the sides of its nodes it uses. When one gets stuck
     because earlier arrows took the sides it needed, it is moved to the front and all are routed again.
     """
-    def is_side_exit(edge):
-        target = diagram.placed[edge.target]
-        return target.side_of is not None and target.side_of[0] == edge.source
+    def is_side_exit(edge):       # two nodes of one column: their arrow runs straight, so it goes first
+        return _same_column(diagram.placed[edge.source], diagram.placed[edge.target])
 
     def key(edge):
         return (0 if is_side_exit(edge) else 1, 0 if edge.main else 1,
@@ -108,8 +108,8 @@ def _route_in_order(diagram, order):
     obstacles = {}
     for node_id, placed in diagram.placed.items():
         obstacles[node_id] = placed.rect.inflate(CLEARANCE)
-        if placed.label_rect is not None:
-            obstacles["label:" + node_id] = placed.label_rect.inflate(1.5)
+        for n, rect in enumerate(placed.label_rects):
+            obstacles["label:%s:%d" % (node_id, n)] = rect.inflate(1.5)
     used = dict((node_id, set()) for node_id in diagram.placed)
     segments = []          # (a, b) of every arrow drawn so far
     routed = []
@@ -135,14 +135,26 @@ def _route_in_order(diagram, order):
 def _best_route(diagram, edge, obstacles, used, segments):
     source = diagram.placed[edge.source]
     target = diagram.placed[edge.target]
-    if target.side_of is not None and target.side_of[0] == edge.source:
-        exits = [target.side_of[1]]
-        entries = ["right" if target.side_of[1] == "left" else "left"]
-    else:
-        exits = [s for s in _exit_sides(source, edge, target) if s not in used[edge.source]]
-        entries = [s for s in _entry_sides(target, source) if s not in used[edge.target]]
+    exits = [s for s in _exit_sides(source, edge, target) if s not in used[edge.source]]
+    entries = [s for s in _entry_sides(target, source) if s not in used[edge.target]]
+    if _same_column(source, target):
+        down = target.cy > source.cy
+        straight = _search(diagram, edge, ["bottom" if down else "top"], ["top" if down else "bottom"],
+                           obstacles, segments, most_bends=0)
+        if straight is not None:
+            return straight
+    return _search(diagram, edge, exits, entries, obstacles, segments)
+
+
+def _same_column(a, b):
+    return abs(a.cx - b.cx) < 0.01
+
+
+def _search(diagram, edge, exits, entries, obstacles, segments, most_bends=4):
+    source = diagram.placed[edge.source]
+    target = diagram.placed[edge.target]
     best = None          # (cost, points, exit side, entry side)
-    for bends in range(5):
+    for bends in range(most_bends + 1):
         for exit_side in exits:
             start = port(source, exit_side)
             out = SIDES[exit_side]
@@ -152,8 +164,11 @@ def _best_route(diagram, edge, obstacles, used, segments):
                 for points in _shapes(diagram, start, out, end, inward, bends):
                     scored = _score(points, out, inward, edge, source, target, exit_side, entry_side,
                                     obstacles, segments, diagram)
-                    if scored is not None and (best is None or scored[0] < best[0]):
-                        best = (scored[0], scored[1], exit_side, entry_side)
+                    if scored is None:
+                        continue
+                    cost = scored[0] + SIDE_RANK * exits.index(exit_side)
+                    if best is None or cost < best[0]:
+                        best = (cost, scored[1], exit_side, entry_side)
         # Every bend costs BEND, so a route with one more bend can no longer win once the best
         # cost is at or below that floor.
         if best is not None and best[0] <= BEND * (bends + 1):
@@ -164,19 +179,18 @@ def _best_route(diagram, edge, obstacles, used, segments):
 
 
 def _exit_sides(source, edge, target):
-    if source.node.type == "decision":
-        toward = "left" if target.cx < source.cx else "right"
-        away = "right" if toward == "left" else "left"
-        if edge.branch == 0:
-            return ["bottom", toward, away]
-        return [toward, "bottom", away]
-    return ["bottom", "right", "left"]
+    """The sides an arrow may leave by, the liked one first: an answer leaves a decision toward the
+    lane it goes to, so the decision's other sides stay free for its other answers."""
+    if source.node.type == "decision" and abs(target.cy - source.cy) > 0.01:
+        toward = "top" if target.cy < source.cy else "bottom"
+        return [toward, "right", "bottom" if toward == "top" else "top"]
+    return ["right", "bottom", "top"]
 
 
 def _entry_sides(target, source):
-    toward = "left" if source.cx < target.cx else "right"
-    away = "right" if toward == "left" else "left"
-    return ["top", toward, away]
+    toward = "top" if source.cy < target.cy else "bottom"
+    away = "bottom" if toward == "top" else "top"
+    return ["left", toward, away]
 
 
 def _shapes(diagram, a, out, b, inward, bends):
@@ -184,7 +198,7 @@ def _shapes(diagram, a, out, b, inward, bends):
     ax, ay = a
     bx, by = b
     rows = sorted(set(diagram.channel_ys + [ay + out[1] * 11.0, by - inward[1] * 11.0]))
-    cols = diagram.channel_xs
+    cols = sorted(set(diagram.channel_xs + [ax + out[0] * 11.0, bx - inward[0] * 11.0]))
     vertical_out, vertical_in = out[0] == 0, inward[0] == 0
     if bends == 0:
         yield [a, b]
@@ -214,6 +228,11 @@ def _shapes(diagram, a, out, b, inward, bends):
             for x in cols:
                 for y2 in rows:
                     yield [a, (ax, y1), (x, y1), (x, y2), (bx, y2), b]
+    elif bends == 4 and not vertical_out and not vertical_in:
+        for x1 in cols:
+            for y in rows:
+                for x2 in cols:
+                    yield [a, (x1, ay), (x1, y), (x2, y), (x2, by), b]
 
 
 def _score(points, out, inward, edge, source, target, exit_side, entry_side, obstacles, segments, diagram):
@@ -223,10 +242,10 @@ def _score(points, out, inward, edge, source, target, exit_side, entry_side, obs
     first, last = _direction(points[0], points[1]), _direction(points[-2], points[-1])
     if first != out or last != inward:
         return None
-    if _length(points[0], points[1]) < STUB_OUT or _length(points[-2], points[-1]) < STUB_IN:
+    if _length(points[0], points[1]) < STUB_OUT - 0.01 or _length(points[-2], points[-1]) < STUB_IN - 0.01:
         return None
     for x, y in points:
-        if not (1.0 <= x <= diagram.width - 1.0 and diagram.top <= y <= diagram.height - 1.0):
+        if not (diagram.left <= x <= diagram.width - 1.0 and 1.0 <= y <= diagram.bottom - 1.0):
             return None
     count = len(points) - 1
     for index, (a, b) in enumerate(zip(points, points[1:])):
@@ -244,9 +263,7 @@ def _score(points, out, inward, edge, source, target, exit_side, entry_side, obs
     bends = count - 1
     length = sum(_length(p, q) for p, q in zip(points, points[1:]))
     cost = bends * BEND + length * PER_POINT
-    if source.node.type == "decision" and exit_side == "bottom" and edge.branch not in (None, 0):
-        cost += 10.0
-    if target.node.type == "decision" and entry_side != "top":
+    if target.node.type == "decision" and entry_side != "left":
         cost += DECISION_SIDE_ENTRY
     return cost, points
 
@@ -295,21 +312,20 @@ def _meets(a, b, c, d):
 # ---------------------------------------------------------------- a decision's answer label
 
 def _place_label(text, points, exit_side, obstacles, segments):
-    font, size = theme.BRANCH_LABEL
-    w, h = theme.width(text, font, size), size * 0.8
+    """The pill for an answer: on one side of the line, right where it leaves the decision. Of the two
+    sides, the one that covers less wins."""
+    font, size = theme.ANSWER
+    w, h = theme.width(text, font, size) + 2 * ANSWER_PAD, ANSWER_H
     x, y = points[0]
-    if exit_side == "bottom":
-        options = [(x + 4, y + 10, "start"), (x - 4, y + 10, "end")]
+    if exit_side == "right":
+        options = [Rect(x + 3, y - 2 - h, x + 3 + w, y - 2), Rect(x + 3, y + 2, x + 3 + w, y + 2 + h)]
     else:
-        sign = -1 if exit_side == "left" else 1
-        anchor = "end" if sign < 0 else "start"
-        options = [(x + sign * 5, y - 4, anchor), (x + sign * 5, y + 10, anchor)]
+        y0 = y - 1.0 - h if exit_side == "top" else y + 1.0
+        options = [Rect(x + 3, y0, x + 3 + w, y0 + h), Rect(x - 3 - w, y0, x - 3, y0 + h)]
     best = None
-    for lx, ly, anchor in options:
-        x0 = lx - w if anchor == "end" else lx
-        rect = Rect(x0 - 1, ly - h - 1, x0 + w + 1, ly + 2)
+    for rect in options:
         clashes = sum(1 for r in obstacles.values() if r.overlaps(rect))
         clashes += sum(1 for a, b in segments if rect.hit_by(a, b))
         if best is None or clashes < best[0]:
-            best = (clashes, (lx, ly, anchor), rect)
-    return best[1], best[2]
+            best = (clashes, rect)
+    return best[1], best[1]

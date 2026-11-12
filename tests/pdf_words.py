@@ -24,14 +24,20 @@ def pages(pdf):
     return found
 
 
-def problems(pdf, edge=10.0, share=0.25):
+def problems(pdf, edge=10.0, share=0.25, trim=0.0):
     """Words outside the page (closer than `edge` to it) and pairs of words that overlap by more than
-    `share` of the smaller word. Returns plain lines; empty means every word sits clear."""
+    `share` of the smaller word. Returns plain lines; empty means every word sits clear.
+
+    `trim` cuts that fraction off the top and the bottom of every word's box before looking for
+    overlaps. pdftotext's box is the font's full line box, and an Arabic font keeps far more room
+    above and below its letters than a Latin one (1.7 times the text size for Noto Naskh Arabic), so
+    two lines that sit clear on the page have boxes that touch."""
     lines = []
     for number, (width, height, words) in enumerate(pages(pdf), 1):
         for x0, y0, x1, y1, text in words:
             if x0 < edge or y0 < edge or x1 > width - edge or y1 > height - edge:
                 lines.append("page %d: %r runs off the page (%.0f..%.0f)" % (number, text, x0, x1))
+        words = [(x0, y0 + trim * (y1 - y0), x1, y1 - trim * (y1 - y0), text) for x0, y0, x1, y1, text in words]
         for i, a in enumerate(words):
             for b in words[i + 1:]:
                 w = min(a[2], b[2]) - max(a[0], b[0])

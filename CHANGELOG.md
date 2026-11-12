@@ -3,6 +3,34 @@
 All notable changes to this project. The version is `VERSION` in
 `skills/workflow-project/scripts/workflow_tool/__init__.py`.
 
+## [0.3.0] - 2026-10-03
+
+### Added
+
+- **Arabic.** Add `"language": "ar"` to a workflow file written in Arabic and the whole PDF is Arabic: the
+  tool's own words (headings, the step table, the key, the footer, the month), and every page mirrored so it
+  reads right to left: the first lane on the right, the logo on the right, the table's columns in Arabic
+  order. English stays the default, and an English PDF is drawn exactly as before (the three examples were
+  compared page by page, picture for picture, before and after).
+- **No new install.** The tool joins the Arabic letters and orders the line itself (`script.py`), so Python
+  3.9+ and `reportlab` are still the only needs. Why, and what that costs, is in
+  `docs/adr/0002-arabic-is-drawn-by-the-tool-itself.md`.
+- **The Arabic font is Noto Naskh Arabic**, the owner's pick from eleven candidates shown on the real page
+  (2026-10-03). Latin words and numbers inside Arabic keep Plus Jakarta Sans. Four static cuts ship in
+  `assets/fonts/` (about 1 MB), SIL Open Font License, credited in `CREDITS.md`.
+- **Languages are files.** Every fixed sentence moved out of the code into `assets/languages/en.json`;
+  `ar.json` is its translation. A check holds every language file to the same sentences and blanks.
+- A fourth example, `examples/leave-request-ar.json`.
+
+### Changed
+
+- A workflow with Arabic words but no `"language": "ar"` is still refused, and the refusal now says to add it.
+
+### Known limits
+
+- Arabic vowel marks (tashkeel) are centred on their letter by a rule of thumb, not by the font's own
+  placement tables. Persian and Urdu letters are refused. The brand name stays in Latin letters.
+
 ## [0.2.1] - 2026-09-28
 
 ### Fixed

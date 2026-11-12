@@ -1,3 +1,3 @@
 """workflow-project drawing tool: a workflow file in, a finished workflow PDF out."""
 
-VERSION = "0.2.1"
+VERSION = "0.3.0"

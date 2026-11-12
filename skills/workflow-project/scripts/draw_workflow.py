@@ -33,7 +33,7 @@ def main(argv=None):
               file=sys.stderr)
         return 3
 
-    from workflow_tool import VERSION, brand, layout, model, pages, theme
+    from workflow_tool import VERSION, brand, language, layout, model, pages, theme
 
     if args.version:
         print("workflow-project drawing tool %s" % VERSION)
@@ -43,17 +43,20 @@ def main(argv=None):
         return 2
 
     theme.register_fonts()
+    language.use(language.DEFAULT)
     try:
         owner = brand.load()
         project = model.load(args.workflow)
     except model.WorkflowError as err:
         return _refuse(err.problems)
+    language.use(project.language)          # from here on every word is measured and drawn in that language
 
     diagrams, problems = [], []
+    where = pages.page_plan(project)
     for part in project.parts:
         try:
-            room = pages.diagram_room(part, len(project.parts))
-            diagrams.append(layout.lay_out(part, pages.FRAME_W, room))
+            room = pages.board_room(part, len(project.parts))
+            diagrams.append(layout.lay_out(part, pages.FRAME_W, room, where))
         except model.WorkflowError as err:
             problems += err.problems
     problems += pages.preflight(project, owner)

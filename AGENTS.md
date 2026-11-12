@@ -21,10 +21,17 @@ bug it should catch.
 ## Draw the examples
 
 ```bash
-for ex in leave-request building-permit workflow-project; do
+for ex in leave-request building-permit workflow-project leave-request-ar; do
   python3 skills/workflow-project/scripts/draw_workflow.py skills/workflow-project/examples/$ex.json -o "/tmp/$ex.pdf"
 done
 ```
+
+## Add a language
+
+Copy `skills/workflow-project/assets/languages/en.json` to `<code>.json` and translate the values; keep
+every key and every `{blank}`. `tests/test_language.py` checks that. A left-to-right language needs nothing
+else if Plus Jakarta Sans has its letters. A right-to-left script other than Arabic needs its own font and
+joining rules: that is a design decision, ask the owner.
 
 ## Rules for this repository
 

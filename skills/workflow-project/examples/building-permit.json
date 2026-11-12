@@ -44,23 +44,32 @@
     },
     {
       "title": "Check the documents",
-      "summary": "An officer checks everything; large buildings also get an engineer's check.",
-      "lanes": ["Applicant", "Portal", "Officer", "Engineer", "Manager"],
+      "summary": "An officer checks everything and asks for fixes until it is correct.",
+      "lanes": ["Applicant", "Portal", "Officer"],
       "nodes": [
         {"id": "start", "type": "start", "lane": "Portal", "title": "Application received"},
         {"id": "review", "type": "step", "lane": "Officer", "title": "Reviews the documents", "detail": "against the building code", "result": "Correct, or a list of fixes"},
         {"id": "correct", "type": "decision", "lane": "Officer", "title": "Correct?",
-         "branches": [{"label": "Yes", "to": "big"}, {"label": "No", "to": "ask"}]},
+         "branches": [{"label": "Yes", "to": "checked"}, {"label": "No", "to": "ask"}]},
         {"id": "ask", "type": "step", "lane": "Officer", "title": "Asks for corrections", "detail": "one clear list", "result": "A message to the applicant"},
         {"id": "fix", "type": "step", "lane": "Applicant", "title": "Sends corrected files", "detail": "within 14 days"},
         {"id": "on-time", "type": "decision", "lane": "Portal", "title": "On time?",
          "branches": [{"label": "Yes", "to": "review"}, {"label": "No", "to": "closed"}]},
         {"id": "closed", "type": "stop", "lane": "Applicant", "title": "Closed", "detail": "no reply in 14 days"},
+        {"id": "checked", "type": "end", "lane": "Officer", "title": "Documents correct", "to_part": 3}
+      ]
+    },
+    {
+      "title": "Approve the review",
+      "summary": "Large buildings also get an engineer's check; then the manager signs.",
+      "lanes": ["Portal", "Officer", "Engineer", "Manager"],
+      "nodes": [
+        {"id": "start", "type": "start", "lane": "Officer", "title": "Documents correct"},
         {"id": "big", "type": "decision", "lane": "Officer", "title": "Over 4 floors?",
          "branches": [{"label": "Yes", "to": "structure"}, {"label": "No", "to": "sign"}]},
         {"id": "structure", "type": "step", "lane": "Engineer", "title": "Checks the structure", "detail": "loads and fire safety", "result": "Structure approved"},
         {"id": "sign", "type": "step", "lane": "Manager", "title": "Signs the review", "result": "A signed review"},
-        {"id": "ready", "type": "end", "lane": "Portal", "title": "Ready for inspection", "to_part": 3}
+        {"id": "ready", "type": "end", "lane": "Portal", "title": "Ready for inspection", "to_part": 4}
       ]
     },
     {
@@ -75,7 +84,7 @@
         {"id": "matches", "type": "decision", "lane": "Officer", "title": "Site matches?",
          "branches": [{"label": "Yes", "to": "passed"}, {"label": "No", "to": "repair"}]},
         {"id": "repair", "type": "step", "lane": "Applicant", "title": "Fixes the site", "detail": "then asks for a new visit", "next": "book"},
-        {"id": "passed", "type": "end", "lane": "Portal", "title": "Inspection passed", "to_part": 4}
+        {"id": "passed", "type": "end", "lane": "Portal", "title": "Inspection passed", "to_part": 5}
       ]
     },
     {

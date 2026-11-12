@@ -50,6 +50,9 @@ Write the workflow as a JSON file. The full format and its rules are in
 - **The first answer of every decision is the normal path**, drawn blue. It must reach an end.
 - **Short words.** A step is a few words with the verb first ("Checks the form"). A question is a few
   words ("Approved?").
+- **Their language.** English is the default. For an Arabic workflow, write every word of the file in
+  Arabic and add `"language": "ar"` to the project (example: `examples/leave-request-ar.json`). The tool
+  then writes its own words in Arabic too and mirrors every page, so it reads right to left.
 
 ## 3. Draw it
 
@@ -82,8 +85,8 @@ plainly when you hand it over.
 
 ## The look is fixed; the brand is yours
 
-The tool draws one house look: Plus Jakarta Sans, a light ground, one blue accent word, red only for a
-stop, the full-grid step table, and an end card. Never restyle the PDF, swap its fonts or colours, or
+The tool draws one house look: Plus Jakarta Sans (Noto Naskh Arabic for Arabic words), a light ground, one
+blue accent word, red only for a stop, the full-grid step table, and an end card. Never restyle the PDF, swap its fonts or colours, or
 add charts, number tiles or dashboards.
 
 Whose **name, logo and website** the PDF carries comes from `assets/brand.json` (WorkSpace Labs by
@@ -100,7 +103,11 @@ Only change the brand when the person asks for their own; the tool refuses a bro
 
 Say these when they matter:
 
-- English text only. Arabic and other scripts are refused for now.
+- English and Arabic. Other languages are refused for now, and so are Persian and Urdu letters. In an
+  Arabic workflow, Latin words and numbers ("PDF", "QR", "14") are fine.
+- Arabic vowel marks (tashkeel) are drawn, but only roughly centred on their letter. Leave them out
+  unless a word needs one.
+- The brand name and website in `assets/brand.json` must be in Latin letters.
 - A single word too wide for where it is drawn (a lane heading, the table's "Who" column, the cover, the
   map) is refused: add a space or shorten it.
 - A4 portrait. Up to 5 lanes and about 9 to 10 rows per part: split bigger parts. Up to 3 answers per
@@ -114,5 +121,5 @@ Say these when they matter:
 | `scripts/draw_workflow.py` | the drawing tool (workflow file in, PDF out) |
 | `references/workflow-format.md` | the file format and its rules |
 | `references/understanding.md` | the questions to ask before mapping |
-| `examples/` | three complete workflow files |
-| `assets/` | the Plus Jakarta Sans font (SIL Open Font License, `assets/fonts/OFL.txt`), `brand.json` and the logo |
+| `examples/` | four complete workflow files, one of them in Arabic |
+| `assets/` | the fonts, Plus Jakarta Sans and Noto Naskh Arabic (SIL Open Font License, `assets/fonts/OFL*.txt`), the words of each language (`assets/languages/`), `brand.json` and the logo |

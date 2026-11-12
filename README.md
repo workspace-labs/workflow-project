@@ -12,7 +12,7 @@ document on every agent.
 The skill is the folder [`skills/workflow-project/`](skills/workflow-project/): its instructions,
 [`SKILL.md`](skills/workflow-project/SKILL.md), and its own drawing tool, so every agent draws the same PDF.
 
-**Version 0.2.1**
+**Version 0.3.0**
 
 ---
 
@@ -28,6 +28,10 @@ The skill is the folder [`skills/workflow-project/`](skills/workflow-project/): 
 
 The page count grows with the project. There is no dashboard, no number tiles, no charts. The look is fixed:
 Plus Jakarta Sans, a light ground, one blue accent word.
+
+**English or Arabic.** Add `"language": "ar"` to the workflow file and the same PDF is drawn in Arabic: the
+tool's own words, the month, and every page mirrored to read right to left, with no extra install. Each
+language is one small file in `assets/languages/`.
 
 ## How it works
 
@@ -95,15 +99,18 @@ python3 skills/workflow-project/scripts/draw_workflow.py my-workflow.json --chec
 python3 -m unittest discover -s tests
 ```
 
-71 checks: the file rules and their plain-language refusals; the drawing's cleanliness (no arrow through a box,
+97 checks: the file rules and their plain-language refusals; the drawing's cleanliness (no arrow through a box,
 no two arrows touching or crossing, nothing overlapping), judged by `tests/geometry_oracle.py`, which never
 imports the tool; every word of accepted PDFs read back with `pdftotext` (skipped where poppler is missing);
 the whole PDF (pages, page numbers, fonts); the brand file, including a name or website too wide for where
-the pages draw it (refused in both routes); and the command line.
+the pages draw it (refused in both routes); the command line; and the languages (the same sentences in every
+language file, Arabic letters joined and ordered as worked out by hand, the Arabic pages mirrored, clean and
+free of overlapping words).
 
 ## Limits
 
-- English text only. Arabic and other scripts are refused, not drawn wrong.
+- English and Arabic. Other scripts, and Persian or Urdu letters, are refused, not drawn wrong. Arabic vowel
+  marks are drawn only roughly centred on their letter. The brand name stays in Latin letters.
 - A single word too wide for where it is drawn (a lane heading, the table's "Who" column, the cover, the
   map, the footer, the last page) is refused with a reason: add a space or shorten it.
 - A4 portrait. Up to 5 lanes and about 9 to 10 rows per part (bigger parts are split); up to 3 answers per decision.
@@ -117,8 +124,8 @@ skills/workflow-project/     the skill (what gets installed)
   references/                the file format, and the questions to ask first
   scripts/draw_workflow.py   the drawing tool
   scripts/workflow_tool/     its parts (see docs/architecture/boundaries.md)
-  examples/                  three complete workflow files
-  assets/                    the font (SIL Open Font License), brand.json and the logo
+  examples/                  four complete workflow files, one in Arabic
+  assets/                    the fonts (SIL Open Font License), the languages, brand.json and the logo
 tests/                       the checks (not shipped with the skill)
 docs/                        scope, architecture, decisions
 media/                       the picture at the top of this page
@@ -131,7 +138,7 @@ machine (or `git pull` in a clone the skill is linked from), then open a fresh s
 
 ## Credits and licence
 
-The code is under the MIT licence (`LICENSE`). Plus Jakarta Sans is by Tokotype, under the SIL Open Font
+The code is under the MIT licence (`LICENSE`). Noto Naskh Arabic is by the Noto Project Authors and Plus Jakarta Sans is by Tokotype, under the SIL Open Font
 License 1.1 (see `CREDITS.md`). The logo and the WorkSpace Labs name are WorkSpace Labs' own and are not
 covered by the MIT licence; replace them with yours through `assets/brand.json`.
 

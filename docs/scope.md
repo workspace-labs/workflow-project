@@ -7,6 +7,8 @@
 - Works for every agent the owner uses: Claude Code, Claude chat and Cowork, Codex, Grok, ChatGPT, and
   agents at work. On the Workspace board, the planner (Grok) makes it at the plan stage; there is no new
   app window.
+- English or Arabic: `"language": "ar"` in the workflow file gives the same PDF in Arabic, every page
+  mirrored to read right to left. Each language is one file of words in `assets/languages/`.
 - One fixed look everywhere: the WorkSpace Labs video look. Whose name, logo and website the PDF carries
   comes from `assets/brand.json` (WorkSpace Labs by default), so another user can put their own brand on it.
 

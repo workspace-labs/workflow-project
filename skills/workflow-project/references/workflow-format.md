@@ -54,13 +54,14 @@ a typo never goes unnoticed.
 |---|---|---|
 | `name` | yes | The project's name, up to 70 characters. It is the cover's title. |
 | `accent` | no | One word of the name drawn in blue. Default: the last word. |
+| `language` | no | `"en"` (the default) or `"ar"`. With `"ar"`, write the whole file in Arabic: the tool writes its own words in Arabic and mirrors every page, so the first lane is on the right. |
 | `summary` | yes | What it is, in two or three sentences (up to 700 characters). |
 | `actors` | yes | Every person, team or system: `[{"name": "...", "role": "..."}]`. Names up to 28 characters; they are the lane names. |
 | `client` | no | Who it is for ("Prepared for …"). |
 | `prepared_by` | no | Default: the brand's name from `assets/brand.json`. |
 | `date` | no | `YYYY-MM-DD`. Default: today. |
 | `version` | no | Default: `1.0`. |
-| `status` | no | Default: `Draft for review`. |
+| `status` | no | Default: `Draft for review`, in the workflow's language. |
 | `assumptions` | no | Up to 8 short sentences: what you assumed. |
 | `open_questions` | no | Up to 8 short sentences: what is still to confirm. |
 
@@ -129,4 +130,5 @@ It never draws something messy. Each refusal is a numbered sentence saying what 
   cover, the map, the footer or the last page (add a space, or shorten it);
 - an arrow that cannot be drawn without crossing a box or touching another arrow (reorder the nodes,
   move a step to another lane, or split the part);
-- characters the house font cannot draw (English text only for now).
+- characters the fonts cannot draw: anything but English in an English workflow; in an Arabic one, anything
+  but Arabic letters, Latin letters and numbers (Persian and Urdu letters are refused).
