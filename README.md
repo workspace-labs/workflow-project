@@ -12,7 +12,7 @@ document on every agent.
 The skill is the folder [`skills/workflow-project/`](skills/workflow-project/): its instructions,
 [`SKILL.md`](skills/workflow-project/SKILL.md), and its own drawing tool, so every agent draws the same PDF.
 
-**Version 0.4.0**
+**Version 0.4.1**
 
 ---
 

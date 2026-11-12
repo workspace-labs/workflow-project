@@ -3,6 +3,14 @@
 All notable changes to this project. The version is `VERSION` in
 `skills/workflow-project/scripts/workflow_tool/__init__.py`.
 
+## [0.4.1] - 2026-11-12
+
+### Changed
+
+- **A new skill is checked against the installed skills only.** The step that searched public skill
+  directories (`npx skills find`) is removed from `SKILL.md`, `references/understanding.md` and the skill's
+  own example workflow, matching the owner's rule of 2026-10-08. Words only: the drawing tool is unchanged.
+
 ## [0.4.0] - 2026-11-12
 
 The Board look, chosen by the owner from three looks drawn on a real project (2026-11-12). Before 1.0.0 a

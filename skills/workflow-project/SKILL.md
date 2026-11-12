@@ -29,9 +29,9 @@ number tiles, no charts.
 
 Never draw a guess.
 
-- **A new skill?** First check whether one already exists: the skills already installed, and the
-  public skills directory (for example `npx skills find <words>`, where that command exists). If one
-  exists, tell the person and let them choose. Map only a skill that will be built.
+- **A new skill?** First check the skills already installed. If one of them does the job, tell the
+  person and let them choose: use it, or build their own. Do not search public skill directories. Map
+  only a skill that will be built.
 - **An already built project?** Read it before you ask anything: its README and docs, its screens or
   routes, and the code that does the work. Map what it does today. Ask the person only what the project
   cannot tell you, and put anything you could not confirm into `open_questions`.

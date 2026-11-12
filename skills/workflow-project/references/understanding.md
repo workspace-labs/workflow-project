@@ -33,7 +33,8 @@ Read first, ask second. The project answers most of the twelve questions above b
 
 ## For a new skill
 
-First check whether a skill that does the job already exists; map only one that will be built.
+First check whether an installed skill already does the job (installed ones only: no public search); map
+only one that will be built.
 
 1. **What should switch it on?** The words and situations, and what must not switch it on.
 2. **Who takes part?** The person, the agent, the skill's own tools, other agents or reviewers.

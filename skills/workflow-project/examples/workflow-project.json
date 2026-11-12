@@ -4,7 +4,7 @@
     "accent": "Workflow",
     "prepared_by": "WorkSpace Labs",
     "date": "2026-11-12",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "summary": "A skill for every AI agent. When someone asks for a new project or a new skill, the agent first understands it, then draws how it will work from A to Z as a clean workflow PDF, before anything is built. For a project that is already built, it reads the project first and draws how it works today.",
     "actors": [
       {"name": "You", "role": "The person who asks for the project and says yes."},
@@ -17,18 +17,18 @@
   "parts": [
     {
       "title": "What was asked",
-      "summary": "A new project goes straight on, and a built one is read first. A new skill is looked up first, then you build ours or install the one that exists.",
+      "summary": "A new project goes straight on; a built one is read first. A new skill is checked against the installed ones first.",
       "lanes": ["You", "The AI"],
       "nodes": [
         {"id": "start", "type": "start", "lane": "You", "title": "Asks for something new"},
         {"id": "skill", "type": "decision", "lane": "The AI", "title": "A new skill?",
          "branches": [{"label": "No", "to": "ready"}, {"label": "Yes", "to": "search"}]},
-        {"id": "search", "type": "step", "lane": "The AI", "title": "Looks for an existing skill", "detail": "installed and public ones"},
-        {"id": "exists", "type": "decision", "lane": "The AI", "title": "One exists?",
+        {"id": "search", "type": "step", "lane": "The AI", "title": "Checks the installed skills", "detail": "only the ones already here"},
+        {"id": "exists", "type": "decision", "lane": "The AI", "title": "One does the job?",
          "branches": [{"label": "No", "to": "ready"}, {"label": "Yes", "to": "build"}]},
         {"id": "build", "type": "decision", "lane": "You", "title": "Build ours?",
          "branches": [{"label": "Yes", "to": "ready"}, {"label": "No", "to": "install"}]},
-        {"id": "install", "type": "stop", "lane": "You", "title": "Install it", "detail": "the one that already exists"},
+        {"id": "install", "type": "stop", "lane": "You", "title": "Use it", "detail": "the one already installed"},
         {"id": "ready", "type": "end", "lane": "The AI", "title": "Ready to ask", "to_part": 2}
       ]
     },
