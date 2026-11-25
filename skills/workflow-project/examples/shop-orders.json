@@ -1,0 +1,49 @@
+{
+  "project": {
+    "name": "Shop Orders",
+    "client": "Sample online shop",
+    "date": "2026-11-25",
+    "status": "How it works today",
+    "summary": "Customers pay for their orders through the shop's checkout. The warehouse packs paid orders and sends them to the carrier.",
+    "actors": [
+      {"name": "Customer", "role": "Places the order and pays for it."},
+      {"name": "Shop", "role": "Takes payment and keeps the order record."},
+      {"name": "Warehouse", "role": "Packs and dispatches paid orders."}
+    ],
+    "assumptions": ["Each order ships as one parcel."],
+    "open_questions": ["How often does the carrier collect parcels?"],
+    "found_gaps": [
+      "In Take the order, a failed payment ends checkout without telling the customer.",
+      "In Take the order, no link in checkout opens the saved addresses screen.",
+      "Ship the order has no path to its Track page."
+    ]
+  },
+  "parts": [
+    {
+      "title": "Take the order",
+      "summary": "The customer submits payment and gets an order number when it succeeds.",
+      "lanes": ["Customer", "Shop"],
+      "nodes": [
+        {"id": "start", "type": "start", "lane": "Customer", "title": "Opens checkout"},
+        {"id": "pay", "type": "step", "lane": "Customer", "title": "Submits payment", "detail": "card details and address"},
+        {"id": "paid", "type": "decision", "lane": "Shop", "title": "Payment accepted?",
+         "branches": [{"label": "Yes", "to": "record"}, {"label": "No", "to": "silent"}]},
+        {"id": "silent", "type": "stop", "lane": "Customer", "title": "Nothing happens", "detail": "payment failed, no message"},
+        {"id": "record", "type": "step", "lane": "Shop", "title": "Records the paid order", "result": "An order number"},
+        {"id": "done", "type": "end", "lane": "Customer", "title": "Sees the order number", "to_part": 2}
+      ]
+    },
+    {
+      "title": "Ship the order",
+      "summary": "The warehouse packs the order and hands the parcel to the carrier.",
+      "lanes": ["Warehouse", "Shop"],
+      "nodes": [
+        {"id": "start", "type": "start", "lane": "Warehouse", "title": "Receives the paid order"},
+        {"id": "pack", "type": "step", "lane": "Warehouse", "title": "Packs the items", "result": "A sealed parcel"},
+        {"id": "dispatch", "type": "step", "lane": "Warehouse", "title": "Dispatches the parcel", "detail": "hands it to the carrier"},
+        {"id": "mark", "type": "step", "lane": "Shop", "title": "Marks the order shipped", "result": "Updated order status"},
+        {"id": "done", "type": "end", "lane": "Shop", "title": "Order marked shipped"}
+      ]
+    }
+  ]
+}

@@ -30,6 +30,15 @@ Read first, ask second. The project answers most of the twelve questions above b
 4. **Ask the person only what the project cannot tell you:** who uses it, which paths matter most, what
    is about to change.
 5. **Anything you could not confirm** goes into `open_questions`, never into an invented step.
+6. **Confirmed gaps** go into `found_gaps`. Record every gap you confirm while reading: a path that ends
+   with nothing happening, a decision with a missing answer, a step nobody does, a screen that promises
+   something the code never does, or a screen nothing leads to. Name the part and the step or screen.
+
+## When a built project is to be developed
+
+Read and map today's project first. Ask what the person wants added or changed and what must keep
+working as it is. Wait for their yes on today's workflow and their agreement on the change before
+mapping the change.
 
 ## For a new skill
 
@@ -45,5 +54,7 @@ only one that will be built.
 
 ## Never
 
-- Never fill a gap with a guess. Put it in `open_questions`; the map page shows it as "Still to confirm".
+- Never fill something you do not know with a guess. Put what you cannot confirm in `open_questions`.
+  It appears as "Still to confirm".
+- Never tidy a gap away, and never report a guess as a gap.
 - Never add a step, actor or decision the person did not describe or confirm.

@@ -4,7 +4,11 @@
 
 - Before a **new project** or a **new skill** is built, the agent understands it, then produces its
   workflow: a PDF showing how it works from A to Z.
-- For a project that is **already built**, the agent reads it first, then draws how it works today.
+- For a built project, the agent reads it first, then draws how it works today and shows the gaps found.
+  Record each confirmed gap in the list, including gaps drawn as stops.
+- When someone asks to **develop a built project** (a new feature, or a change to how it works), hand
+  over today's workflow first. A development adds or changes a step, a decision, an actor or a part.
+  Keep today's JSON and PDF, then draw the workflow after the agreed change.
 - Works for every agent the owner uses: Claude Code, Claude chat and Cowork, Codex, Grok, ChatGPT, and
   agents at work. On the Workspace board, the planner (Grok) makes it at the plan stage; there is no new
   app window.
@@ -18,6 +22,8 @@
 
 - No dashboards, number tiles or charts (the owner's rule).
 - No workflow for fixes, small changes or rule changes.
+- No fixing the project and no bug hunt. The list covers only the gaps found while mapping how the
+  project flows, so a full bug search, testing and review remain separate work.
 - No build plan (stages, dates, who builds what). The workflow shows how the finished project works.
 - No drawing by hand when the tool refuses: the agent changes the file, or splits the part.
 - No network access, no data collection, no new service: the tool reads one file and writes one PDF.

@@ -19,7 +19,7 @@ MAX_LIST_ITEMS = 8
 
 _TOP_KEYS = {"project", "parts"}
 _PROJECT_KEYS = {"name", "accent", "client", "prepared_by", "date", "version", "status", "summary",
-                 "actors", "assumptions", "open_questions", "language"}
+                 "actors", "assumptions", "open_questions", "found_gaps", "language"}
 _PART_KEYS = {"title", "summary", "lanes", "nodes"}
 _NODE_KEYS = {
     "start": {"id", "type", "lane", "title", "next"},
@@ -94,6 +94,7 @@ class Project(object):
         self.actors = []          # [(name, role)]
         self.assumptions = []
         self.open_questions = []
+        self.found_gaps = []
         self.parts = []
 
 
@@ -191,6 +192,7 @@ def _parse_project(raw, problems):
     project.actors = _parse_actors(raw.get("actors"), problems)
     project.assumptions = _text_list(raw.get("assumptions"), 'The project\'s "assumptions"', problems)
     project.open_questions = _text_list(raw.get("open_questions"), 'The project\'s "open_questions"', problems)
+    project.found_gaps = _text_list(raw.get("found_gaps"), 'The project\'s "found_gaps"', problems)
     return project
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project. The version is `VERSION` in
 `skills/workflow-project/scripts/workflow_tool/__init__.py`.
 
+## [0.5.0] - 2026-11-25
+
+### Added
+
+- **Develop a built project.** Hand over today's workflow first, then keep its JSON and PDF when
+  drawing the workflow after the agreed change.
+- **Gaps found.** Record confirmed gaps with `project.found_gaps`. The PDF draws the list in English or
+  Arabic beside what we assumed and what is still to confirm.
+- **Shop orders.** A built-project example that shows a payment dead end and lists gaps found while
+  mapping the flow.
+
 ## [0.4.1] - 2026-11-12
 
 ### Changed

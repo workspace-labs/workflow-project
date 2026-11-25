@@ -4,15 +4,18 @@
 
 **Understand a project first. Then hand over how it works, from A to Z.**
 
-An agent skill that makes a project's **workflow**: a clean, professional PDF showing how a new project (or a
-new skill) works, before anyone builds it, or how a project that is already built works today. Who does what, every step, every decision, and where a request
-stops early. Companies and government offices expect the builder to hand one over; this skill makes the same
-document on every agent.
+An agent skill that makes a project's **workflow**: a clean, professional PDF showing who does what,
+every step, every decision, and where a request stops early. Companies and government offices expect
+the builder to hand one over; this skill makes the same document on every agent. Draw a new project or
+skill before building it. For a built project, draw how it works today and show the gaps found.
+
+When someone asks to **develop a built project** (a new feature, or a change to how it works), hand over
+today's workflow first. Keep its JSON and PDF, then draw the workflow after the agreed change.
 
 The skill is the folder [`skills/workflow-project/`](skills/workflow-project/): its instructions,
 [`SKILL.md`](skills/workflow-project/SKILL.md), and its own drawing tool, so every agent draws the same PDF.
 
-**Version 0.4.1**
+**Version 0.5.0**
 
 ---
 
@@ -21,8 +24,9 @@ The skill is the folder [`skills/workflow-project/`](skills/workflow-project/): 
 Every page lies sideways (A4 landscape).
 
 1. **Cover**: the project's name, every part on one path, who it is for, date, version, status.
-2. **The map**: what the project is, who takes part, every part as one box with the page it is on, and what
-   was assumed and what is still to confirm.
+2. **The map**: what the project is, who takes part, and every part as one box with the page it is on.
+   Gaps found, what we assumed, and what is still to confirm go under the map when they fit, or on a
+   last page of their own.
 3. **For each part, one page**: a board with one row per person or system and time running across; a blue
    line for the normal path, dashed grey lines for the other paths, an amber box for a question, a red ring
    where it stops early; and under it a strip saying what comes out of every step.
@@ -73,8 +77,8 @@ rm -f dist/workflow-project.zip && mkdir -p dist
 **ChatGPT**: where your plan offers **Skills → Create → Upload from your computer**, upload the same zip.
 Not tested yet.
 
-Then start a fresh session and ask for a new project, or for the workflow of one you have. The agent asks
-its questions first, then hands over the PDF.
+Then start a fresh session and ask for a new project, for the workflow of one you have, or to develop a
+built project. The agent understands how it works first, then hands over the PDF.
 
 ## Your own brand
 
@@ -102,7 +106,7 @@ python3 skills/workflow-project/scripts/draw_workflow.py my-workflow.json --chec
 python3 -m unittest discover -s tests
 ```
 
-104 checks: the file rules and their plain-language refusals; the drawing's cleanliness (no arrow through a box,
+112 checks: the file rules and their plain-language refusals; the drawing's cleanliness (no arrow through a box,
 no two arrows touching or crossing, nothing overlapping), judged by `tests/geometry_oracle.py`, which never
 imports the tool; every word of accepted PDFs read back with `pdftotext` (skipped where poppler is missing);
 the whole PDF (pages, page numbers, fonts); the brand file, including a website too wide for where
@@ -128,7 +132,7 @@ skills/workflow-project/     the skill (what gets installed)
   references/                the file format, and the questions to ask first
   scripts/draw_workflow.py   the drawing tool
   scripts/workflow_tool/     its parts (see docs/architecture/boundaries.md)
-  examples/                  four complete workflow files, one in Arabic
+  examples/                  five complete workflow files, one in Arabic
   assets/                    the font (SIL Open Font License), the languages, brand.json and the logo
 tests/                       the checks (not shipped with the skill)
 docs/                        scope, architecture, decisions

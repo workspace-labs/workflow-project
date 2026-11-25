@@ -1,6 +1,6 @@
 ---
 name: workflow-project
-description: "Use when someone asks for a NEW project or a NEW agent skill (an app, website, system, tool, service or skill), before anything is built: first understand it, then produce its workflow, a professional PDF showing how it works from A to Z (the whole project as a map, then one page per part: who does what, every step, every decision, where a request stops, what comes out), drawn in one fixed, clean house look by the skill's own tool. Also when asked for the workflow, process map or swimlane diagram of a project, including one that is ALREADY built: read it first, then draw how it really works. Not for fixes or small changes, not for a plan of how or when it will be built, and not for running several agents at once (some agents call that a workflow)."
+description: "Use when someone asks for a NEW project or a NEW agent skill (an app, website, system, tool, service or skill), before anything is built: first understand it, then produce its workflow, a professional PDF showing how it works from A to Z (the whole project as a map, then one page per part: who does what, every step, every decision, where a request stops, what comes out), drawn in one fixed, clean house look by the skill's own tool. Also when asked for the workflow, process map or swimlane diagram of a project, including one that is ALREADY built: read it first, then draw how it really works. Also when someone asks to develop, extend or change a project that is already built. Not for fixes or small changes, not for a plan of how or when it will be built, and not for running several agents at once (some agents call that a workflow)."
 ---
 
 # workflow-project
@@ -8,10 +8,11 @@ description: "Use when someone asks for a NEW project or a NEW agent skill (an a
 Companies and government offices expect the builder of a project to hand over its **workflow**: how
 the finished project works, from A to Z. This skill makes that document, the same way on every agent.
 
-**The PDF** lies sideways (A4 landscape): a cover with every part on one path · the map (who takes part,
-every part as one box with its page, what was assumed and what is still to confirm) · then **one page
-per part**: a board with one row per person or system, time running across, a blue line for the normal
-path, dashed lines where it goes another way, and under it a strip saying what comes out of every step.
+**The PDF** lies sideways (A4 landscape): a cover with every part on one path · the map (who takes part
+and every part as one box with its page) · then **one page per part** with a board. Each board has a row
+per person or system, time running across, a blue line for the normal path, dashed lines where it goes
+another way, and a strip below saying what comes out of every step. The lists of gaps found, what was
+assumed and what is still to confirm go under the map or on the last page if they need more room.
 It grows with the project: 3 pages for a small one, a page more for every part. **No dashboard**: no
 number tiles, no charts.
 
@@ -19,11 +20,14 @@ number tiles, no charts.
 
 - Someone asks for a **new project** or a **new skill**. Make the workflow before building anything.
 - Someone asks for a project's workflow, process map or swimlane.
-- The project is **already built**. Draw how it really works today, not how it was planned.
+- For a **built project**, draw how it really works today, even if that is not how it was planned, and
+  show the gaps found.
+- Someone asks to **develop** a built project (a new feature, or a change to how it works). A development
+  adds or changes a step, a decision, an actor or a part. A fix that changes none of these gets no workflow.
 - **Not** for fixes, small changes, or a plan of the build's stages and dates. **Not** for running
   several agents at once: in some agents "use a workflow" means that, and this skill is not it.
 - A workflow for this project **already exists** (for example, linked from the plan)? Read it and build
-  from it. Do not draw a second one; if the project has changed, redraw the same one.
+  from it. For a refresh, redraw the same workflow. For development, keep both workflows as described below.
 
 ## 1. Understand it first
 
@@ -35,6 +39,10 @@ Never draw a guess.
 - **An already built project?** Read it before you ask anything: its README and docs, its screens or
   routes, and the code that does the work. Map what it does today. Ask the person only what the project
   cannot tell you, and put anything you could not confirm into `open_questions`.
+- **Confirmed gaps** go into `found_gaps`. Record every gap you confirm while reading: a path that ends
+  with nothing happening, a decision with a missing answer, a step nobody does, a screen that promises
+  something the code never does, or a screen nothing leads to. Keep those gaps in the workflow and leave
+  the project as you found it. The person decides what to repair.
 - **Ask until you understand.** The questions are in [references/understanding.md](references/understanding.md).
   Ask in rounds: each answer can open a sharper question. If a clarifying-questions skill is installed
   (such as `prompt-guard`), use it for the asking.
@@ -45,14 +53,18 @@ Never draw a guess.
 
 Write the workflow as a JSON file. The full format and its rules are in
 [references/workflow-format.md](references/workflow-format.md). Complete examples are in `examples/`:
-`leave-request.json` (one part), `building-permit.json` (four parts, loops, five lanes) and
-`workflow-project.json` (this skill's own workflow).
+`leave-request.json` (one part), `building-permit.json` (five parts, loops, five lanes),
+`workflow-project.json` (this skill's own workflow), `leave-request-ar.json` (in Arabic) and
+`shop-orders.json` (a built project with gaps).
 
 - **Parts** are the main stages, in the order they happen: that is the A to Z.
 - **Actors** are every person, team or system, each with a one-line role. A part uses 1 to 5 of them as
   lanes; two to four read best.
 - **Nodes** in the order they happen: a start, the steps and decisions, and at least one end. A stop is
   where it ends early. `next` sends the flow somewhere other than the following node (loops, jumps).
+- **Gaps in a built project.** Draw real dead ends as stops. List confirmed gaps in `found_gaps`, with
+  the part and step or screen. Keep any gap that cannot be drawn truthfully in the list alone. Follow
+  [the format guide](references/workflow-format.md#a-built-project-with-a-gap) for examples.
 - **The first answer of every decision is the normal path**, drawn blue. It must reach an end.
 - **Short words.** A step is a few words with the verb first ("Checks the form"). A question is a few
   words ("Approved?"). A step's `result` is what comes out of it, in a few words ("A signed form").
@@ -69,8 +81,9 @@ python3 <this skill's folder>/scripts/draw_workflow.py workflow.json -o "<Projec
 - It needs Python 3.9+ and the `reportlab` package. Claude's and ChatGPT's code sandboxes already have
   it. Anywhere else: `pip install reportlab`, and ask first if your rules say installs need approval.
 - It checks everything before drawing: the file, every word against the place it is drawn, every arrow
-  against every box and every other arrow. If it refuses, it lists numbered reasons. **Change exactly those in the file and run it
-  again.** If a part is "too long" or "too tall" for one page, split it into two parts.
+  against every box and every other arrow. If it refuses, use its numbered reasons to correct the file
+  and run it again. Keep the actual flow and follow the format guide for gaps in a built project. If a
+  part is "too long" or "too tall" for one page, split it into two parts.
 - **Never** draw the diagram yourself to get around a refusal, and never edit the tool to silence one.
   A messy workflow is worse than none.
 - `--check` runs every check without drawing.
@@ -87,7 +100,19 @@ plainly when you hand it over.
   `docs/workflow/`, or in a chat sandbox's outputs folder. Keep the `.json` next to the PDF so it can be
   changed and redrawn later.
 - Tell them in two to four plain sentences: what it shows, how many parts and pages, and what is
-  still to confirm. Then **stop**. Building starts only when they say yes.
+  still to confirm. For a built project, also say how many gaps you found and that they decide what to
+  do with them. Then **stop**. Building starts only when they say yes.
+
+## Developing a built project: two workflows
+
+1. Draw today's workflow with `"status": "How it works today"` and the gaps found. Hand it over and
+   stop. The person decides which gaps become work and what is added.
+2. After the person confirms today's workflow and agrees to the change, keep today's pair. Copy the
+   `.json` and `.pdf` beside the originals, adding `- before <YYYY-MM-DD>` before each file extension.
+   Then draw the workflow with the agreed change and `"status": "After the change"`. Remove a gap from
+   `found_gaps` when the change closes it. Keep the other gaps.
+
+Write both statuses in Arabic for Arabic workflows: "كيف يعمل اليوم" and "بعد التغيير".
 
 ## The look is fixed; the brand is yours
 
@@ -122,6 +147,8 @@ Say these when they matter:
   above it in a lower lane shares its column) and up to 5 lanes; with 4 or 5 lanes keep titles short.
   Split bigger parts. Up to 3 answers per decision.
 - On the map, parts follow one another in order.
+- The list covers only the gaps found while mapping how the project flows, so a full bug search,
+  testing and review remain separate work.
 
 ## Files
 
@@ -130,5 +157,5 @@ Say these when they matter:
 | `scripts/draw_workflow.py` | the drawing tool (workflow file in, PDF out) |
 | `references/workflow-format.md` | the file format and its rules |
 | `references/understanding.md` | the questions to ask before mapping |
-| `examples/` | four complete workflow files, one of them in Arabic |
+| `examples/` | five complete workflow files, one of them in Arabic |
 | `assets/` | the font, Alexandria (SIL Open Font License, `assets/fonts/OFL-Alexandria.txt`), the words of each language (`assets/languages/`), `brand.json` and the logo |

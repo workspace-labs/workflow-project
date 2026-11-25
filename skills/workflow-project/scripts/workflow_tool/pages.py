@@ -1,8 +1,8 @@
 """Puts the whole workflow PDF together, on A4 pages lying sideways.
 
 Order: the cover · the map (who takes part, and every part as one box with its page) · one page per
-part (its board). What was assumed and what is still to confirm go under the map when they fit there,
-and on a last page of their own when they do not.
+part (its board). Gaps found, what was assumed and what is still to confirm go under the map when
+they fit there, and on a last page of their own when they do not.
 Every page is drawn straight onto the canvas at fixed places, so each part's page number is known
 before anything is drawn.
 
@@ -38,6 +38,7 @@ COVER_SIZES = ((99.0, 1), (82.0, 1), (66.0, 1), (54.0, 2), (44.0, 2), (36.0, 3))
 PATH_MOST = 12                      # ponytail: the cover names up to 12 parts; a longer project keeps a plain cover
 CARD_GAP = 19.5
 ACTOR_GAP = 9.0
+CLOSING_GAP = 36.0
 
 
 # ---------------------------------------------------------------- small helpers
@@ -492,12 +493,13 @@ def _draw_part_page(c, part, total_parts, diagram):
 # ---------------------------------------------------------------- the last page
 
 def _plan_closing(project):
-    """What was assumed and what is still to confirm; None when there is neither."""
-    lists = [(t(key), items) for key, items in (("assumed", project.assumptions), ("confirm", project.open_questions))
-             if items]
+    """Plans the closing lists, or returns None when they are all empty."""
+    fields = (("gaps", project.found_gaps), ("assumed", project.assumptions), ("confirm", project.open_questions))
+    lists = [(t(key), items) for key, items in fields if items]
     if not lists:
         return None, []
-    width = (FRAME_W - 36.0) / 2.0 if len(lists) == 2 else FRAME_W * 0.7
+    count = len(lists)
+    width = FRAME_W * 0.7 if count == 1 else (FRAME_W - CLOSING_GAP * (count - 1)) / count
     problems, columns, tallest = [], [], 0.0
     room = BODY_TOP - _heading_height([]) - BODY_BOTTOM
     for title, items in lists:
@@ -509,15 +511,17 @@ def _plan_closing(project):
         tallest = max(tallest, 20.0 + sum(13.6 * len(lines) + 5.0 for lines in wrapped))
         columns.append((title, wrapped))
     if tallest > room:
-        problems.append('The sentences under "%s" and "%s" need more than a page holds. Shorten them, or keep '
-                        'fewer.' % (t("assumed"), t("confirm")))
+        titles = ['"%s"' % title for title, _ in lists]
+        headings = "%s, %s, and %s" % tuple(titles) if count == 3 else " and ".join(titles)
+        problems.append('The sentences under %s need more than a page holds. Shorten them, or keep '
+                        'fewer.' % headings)
     return {"width": width, "columns": columns, "height": tallest}, problems
 
 
 def _draw_closing(c, plan, y):
-    """The two lists, side by side, from the height y downward."""
+    """Draws the closing lists side by side, from the height y downward."""
     for k, (title, items) in enumerate(plan["columns"]):
-        x = MARGIN_X + (plan["width"] + 36.0) * k
+        x = MARGIN_X + (plan["width"] + CLOSING_GAP) * k
         c.setFillColor(theme.INK_SOFT)
         c.setFont(theme.BOLD, 9.4)
         c.drawString(x, y - 11.0, title)
@@ -531,8 +535,8 @@ def _draw_closing(c, plan, y):
 # ---------------------------------------------------------------- the whole document
 
 def page_plan(project):
-    """Which page everything is on: {"total": pages, "map": map pages, "closing": True when what was assumed
-    and is still to confirm needs a page of its own, part number: its page, ...}."""
+    """Which page everything is on: {"total": pages, "map": map pages, "closing": True when the closing
+    lists need a page of their own, part number: its page, ...}."""
     map_plan, _ = _plan_map(project)
     closing, _ = _plan_closing(project)
     _, room, used = map_plan["pages"][-1]

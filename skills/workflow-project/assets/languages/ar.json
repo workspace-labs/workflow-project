@@ -28,6 +28,7 @@
     "date_format": "{day} {month} {year}",
     "who": "من يشارك",
     "main_parts": "الأجزاء بالترتيب",
+    "gaps": "ثغرات وجدناها",
     "assumed": "ما افترضناه",
     "confirm": "ما يحتاج إلى تأكيد",
     "closing_title": "قبل البناء",

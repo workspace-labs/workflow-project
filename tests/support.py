@@ -21,7 +21,7 @@ from workflow_tool import theme  # noqa: E402
 
 theme.register_fonts()
 
-EXAMPLE_NAMES = ("leave-request", "building-permit", "workflow-project")
+EXAMPLE_NAMES = ("leave-request", "building-permit", "workflow-project", "shop-orders")
 
 
 def example_data(name):

@@ -21,7 +21,7 @@ bug it should catch.
 ## Draw the examples
 
 ```bash
-for ex in leave-request building-permit workflow-project leave-request-ar; do
+for ex in leave-request building-permit workflow-project leave-request-ar shop-orders; do
   python3 skills/workflow-project/scripts/draw_workflow.py skills/workflow-project/examples/$ex.json -o "/tmp/$ex.pdf"
 done
 ```

@@ -28,6 +28,7 @@
     "date_format": "{day} {month} {year}",
     "who": "Who takes part",
     "main_parts": "The parts, in order",
+    "gaps": "Gaps found",
     "assumed": "What we assumed",
     "confirm": "Still to confirm",
     "closing_title": "Before it is built",

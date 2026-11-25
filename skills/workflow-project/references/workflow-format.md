@@ -11,6 +11,7 @@ a typo never goes unnoticed.
 - Nodes
 - Decisions
 - Loops, jumps and joins
+- A built project with a gap
 - How it is drawn
 - What the tool refuses
 
@@ -64,6 +65,7 @@ a typo never goes unnoticed.
 | `status` | no | Default: `Draft for review`, in the workflow's language. |
 | `assumptions` | no | Up to 8 short sentences: what you assumed. |
 | `open_questions` | no | Up to 8 short sentences: what is still to confirm. |
+| `found_gaps` | no | For a project that is already built, up to 8 short sentences (220 characters each) about gaps confirmed while mapping it. |
 
 ## `parts`
 
@@ -111,6 +113,16 @@ Every node has `id` (letters, numbers, `-` or `_`, unique in its part), `type`, 
 - A loop: `{"id": "remind", ..., "next": "pay"}` sends the flow back to an earlier node.
 - A join: two paths may lead to the same node (a decision's answer and a step's `next`).
 - List a side path's steps right after the decision that starts it, then the normal path's next step.
+
+## A built project with a gap
+
+- A path that really ends with nothing happening is a `stop`. Say what happens in its title and
+  detail. For example, use "Nothing happens" for the title and "payment failed, no message" for
+  the detail. Write one sentence in `found_gaps` naming the part and the step.
+- If a gap cannot be drawn truthfully, write it only in `found_gaps`. A screen nothing leads to, a loop
+  with no way out, or a promise on a screen that no code keeps belongs in this list. Name the part and
+  the step or screen.
+- Never make the file draw by adding a step, an end or a way out that the project does not have.
 
 ## How it is drawn
 
