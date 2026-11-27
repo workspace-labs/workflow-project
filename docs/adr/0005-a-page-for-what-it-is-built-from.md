@@ -1,7 +1,6 @@
 # 0005. A page for what it is built from
 
 - Status: accepted (by the owner, 2026-11-27).
-- The owner decides acceptance.
 
 ## Context
 
