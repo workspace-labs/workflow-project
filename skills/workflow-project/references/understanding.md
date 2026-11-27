@@ -19,6 +19,10 @@ tool has them, always with a way to type their own answer.
 11. **What must never happen?** Rules that shape a step or a decision.
 12. **What is not part of it?** So nobody draws it in.
 
+For the optional systems page, ask which screens, services and stores the project uses.
+What does each send, and which system receives it? For a built project, trace those
+connections in the code before asking about any that remain unclear.
+
 ## For a project that is already built
 
 Read first, ask second. The project answers most of the twelve questions above by itself.

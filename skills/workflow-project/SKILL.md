@@ -1,6 +1,6 @@
 ---
 name: workflow-project
-description: "Use when someone asks for a NEW project or a NEW agent skill (an app, website, system, tool, service or skill), before anything is built: first understand it, then produce its workflow, a professional PDF showing how it works from A to Z (the whole project as a map, then one page per part: who does what, every step, every decision, where a request stops, what comes out), drawn in one fixed, clean house look by the skill's own tool. Also when asked for the workflow, process map or swimlane diagram of a project, including one that is ALREADY built: read it first, then draw how it really works. Also when someone asks to develop, extend or change a project that is already built. Not for fixes or small changes, not for a plan of how or when it will be built, and not for running several agents at once (some agents call that a workflow)."
+description: "Use when someone asks for a NEW project or a NEW agent skill (an app, website, system, tool, service or skill), before anything is built: first understand it, then produce its workflow, a professional PDF showing how it works from A to Z (the whole project as a map, an optional page showing how its systems connect, then one page per part: who does what, every step, every decision, where a request stops, what comes out), drawn in one fixed, clean house look by the skill's own tool. Also when asked for the workflow, process map or swimlane diagram of a project, including one that is ALREADY built: read it first, then draw how it really works. Also when someone asks to develop, extend or change a project that is already built. Not for fixes or small changes, not for a plan of how or when it will be built, and not for running several agents at once (some agents call that a workflow)."
 ---
 
 # workflow-project
@@ -9,7 +9,8 @@ Companies and government offices expect the builder of a project to hand over it
 the finished project works, from A to Z. This skill makes that document, the same way on every agent.
 
 **The PDF** lies sideways (A4 landscape): a cover with every part on one path · the map (who takes part
-and every part as one box with its page) · then **one page per part** with a board. Each board has a row
+and every part as one box with its page) · an optional **What it is built from** page showing what the
+systems send each other · then **one page per part** with a board. Each board has a row
 per person or system, time running across, a blue line for the normal path, dashed lines where it goes
 another way, and a strip below saying what comes out of every step. The lists of gaps found, what was
 assumed and what is still to confirm go under the map or on the last page if they need more room.
@@ -55,9 +56,12 @@ Write the workflow as a JSON file. The full format and its rules are in
 [references/workflow-format.md](references/workflow-format.md). Complete examples are in `examples/`:
 `leave-request.json` (one part), `building-permit.json` (five parts, loops, five lanes),
 `workflow-project.json` (this skill's own workflow), `leave-request-ar.json` (in Arabic) and
-`shop-orders.json` (a built project with gaps).
+`shop-orders.json` (a built project with gaps and a systems page).
 
 - **Parts** are the main stages, in the order they happen: that is the A to Z.
+- **Systems.** When the project uses more than one screen, service or store, add `project.systems`.
+  Name each system and what it sends. For a built project, trace each connection in the code.
+  Skip this page for a process carried out entirely by people.
 - **Actors** are every person, team or system, each with a one-line role. A part uses 1 to 5 of them as
   lanes; two to four read best.
 - **Nodes** in the order they happen: a start, the steps and decisions, and at least one end. A stop is

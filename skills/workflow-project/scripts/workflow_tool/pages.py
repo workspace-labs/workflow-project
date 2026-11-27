@@ -1,7 +1,7 @@
 """Puts the whole workflow PDF together, on A4 pages lying sideways.
 
-Order: the cover · the map (who takes part, and every part as one box with its page) · one page per
-part (its board). Gaps found, what was assumed and what is still to confirm go under the map when
+Order: the cover · the map · the optional systems page · one board per part.
+Gaps found, what was assumed and what is still to confirm go under the map when
 they fit there, and on a last page of their own when they do not.
 Every page is drawn straight onto the canvas at fixed places, so each part's page number is known
 before anything is drawn.
@@ -16,9 +16,10 @@ import math
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.pdfgen.canvas import Canvas
 
-from . import language, paint, render_diagram, theme
+from . import language, paint, render_diagram, render_systems, systems_layout, theme
 from .language import t
 from .mirror import MirrorCanvas
+from .model import WorkflowError
 
 PAGE_W, PAGE_H = landscape(A4)
 MARGIN_X = 33.0
@@ -460,6 +461,24 @@ def _chevron(c, x, y):
     c.restoreState()
 
 
+# ---------------------------------------------------------------- the systems page
+
+def _plan_systems(project):
+    """Check the translated heading and lay out the diagram in the space below it."""
+    sub = [t("systems_lede")]
+    for key, font, size, room in (("systems_overline", theme.BOLD, 9.4, FRAME_W),
+                                  ("systems_title", theme.EXTRABOLD, TITLE_SIZES[0], FRAME_W),
+                                  ("systems_lede", LEDE[0], LEDE[1], LEDE_W)):
+        if theme.width(t(key), font, size) > room:
+            return None, ['Shorten "%s" in the language file so it fits on one line.' % key]
+    height = BODY_TOP - _heading_height(sub) - BODY_BOTTOM
+    try:
+        diagram = systems_layout.lay_out(project.systems, FRAME_W, height)
+    except WorkflowError as err:
+        return None, err.problems
+    return (sub, diagram), []
+
+
 # ---------------------------------------------------------------- a part's page
 
 def _plan_part(part, total_parts):
@@ -536,14 +555,18 @@ def _draw_closing(c, plan, y):
 
 def page_plan(project):
     """Which page everything is on: {"total": pages, "map": map pages, "closing": True when the closing
-    lists need a page of their own, part number: its page, ...}."""
+    lists need a page of their own, "systems": its page if present, part number: its page, ...}."""
     map_plan, _ = _plan_map(project)
     closing, _ = _plan_closing(project)
     _, room, used = map_plan["pages"][-1]
     found = {"map": len(map_plan["pages"]), "closing": bool(closing) and closing["height"] > room - used - 4.0}
+    before_parts = 1 + found["map"]
+    if project.systems:
+        before_parts += 1
+        found["systems"] = before_parts
     for part in project.parts:
-        found[part.number] = 1 + found["map"] + part.number
-    found["total"] = 1 + found["map"] + len(project.parts) + (1 if found["closing"] else 0)
+        found[part.number] = before_parts + part.number
+    found["total"] = before_parts + len(project.parts) + int(found["closing"])
     return found
 
 
@@ -554,6 +577,8 @@ def preflight(project, brand):
     found = page_plan(project)
     problems += _plan_cover(project, brand, found["total"])[1]
     problems += _plan_map(project)[1]
+    if project.systems:
+        problems += _plan_systems(project)[1]
     for part in project.parts:
         problems += _plan_part(part, len(project.parts))[1]
     problems += _plan_closing(project)[1]
@@ -570,6 +595,10 @@ def build(project, diagrams, out_path, brand):
     """Writes the PDF with the given brand (brand.load()). Returns page_plan(project)."""
     found = page_plan(project)
     total = found["total"]
+    if project.systems:
+        systems_page, problems = _plan_systems(project)
+        if problems:
+            raise WorkflowError(problems)
     c = (MirrorCanvas if language.rtl() else Canvas)(out_path, pagesize=(PAGE_W, PAGE_H))
     c.setTitle(t("doc_title", name=project.name))
     c.setAuthor(project.prepared_by or brand.name)
@@ -584,6 +613,12 @@ def build(project, diagrams, out_path, brand):
         under = closing if index == found["map"] - 1 and not found["closing"] else None
         _inner_page(c, project, brand, 2 + index, total)
         _draw_map_page(c, project, map_plan, index, found, under)
+        c.showPage()
+    if project.systems:
+        _inner_page(c, project, brand, found["systems"], total)
+        sub, diagram = systems_page
+        top = _draw_heading(c, t("systems_overline"), t("systems_title"), TITLE_SIZES[0], sub)
+        render_systems.draw(c, diagram, MARGIN_X, top)
         c.showPage()
     for part, diagram in zip(project.parts, diagrams):
         _inner_page(c, project, brand, found[part.number], total)

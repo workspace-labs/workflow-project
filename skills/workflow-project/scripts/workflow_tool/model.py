@@ -5,6 +5,7 @@ swimlane page: its lanes, then its nodes in the order they happen. Every problem
 plain sentence that says what to change, so the agent that wrote the file can fix it and run again.
 """
 
+from collections import namedtuple
 import datetime
 import json
 import re
@@ -16,10 +17,14 @@ TERMINALS = ("end", "stop")
 MAX_LANES = 5
 MIN_BRANCHES, MAX_BRANCHES = 2, 3
 MAX_LIST_ITEMS = 8
+MAX_SYSTEMS = 8
+
+System = namedtuple("System", "name detail sends")
+Send = namedtuple("Send", "to what")
 
 _TOP_KEYS = {"project", "parts"}
 _PROJECT_KEYS = {"name", "accent", "client", "prepared_by", "date", "version", "status", "summary",
-                 "actors", "assumptions", "open_questions", "found_gaps", "language"}
+                 "actors", "assumptions", "open_questions", "found_gaps", "systems", "language"}
 _PART_KEYS = {"title", "summary", "lanes", "nodes"}
 _NODE_KEYS = {
     "start": {"id", "type", "lane", "title", "next"},
@@ -95,6 +100,7 @@ class Project(object):
         self.assumptions = []
         self.open_questions = []
         self.found_gaps = []
+        self.systems = []
         self.parts = []
 
 
@@ -193,7 +199,105 @@ def _parse_project(raw, problems):
     project.assumptions = _text_list(raw.get("assumptions"), 'The project\'s "assumptions"', problems)
     project.open_questions = _text_list(raw.get("open_questions"), 'The project\'s "open_questions"', problems)
     project.found_gaps = _text_list(raw.get("found_gaps"), 'The project\'s "found_gaps"', problems)
+    if "systems" in raw:
+        project.systems = _parse_systems(raw["systems"], problems)
     return project
+
+
+def _parse_systems(raw, problems):
+    previous_problems = len(problems)
+    if not isinstance(raw, list):
+        problems.append('The project field "systems" must be a list.')
+        return []
+    if len(raw) < 2:
+        problems.append('List at least 2 systems, or leave out "systems".')
+    if len(raw) > MAX_SYSTEMS:
+        problems.append('You listed %d systems. Please use fewer systems so the list fits one page (up to %d).'
+                        % (len(raw), MAX_SYSTEMS))
+        return []
+
+    systems = []
+    names = set()
+    for number, item in enumerate(raw, 1):
+        where = "System %d" % number
+        if not isinstance(item, dict):
+            problems.append('%s must be an object with a "name".' % where)
+            continue
+        _unknown_keys(item, {"name", "detail", "sends"}, where, problems)
+        name = _text(item.get("name"), '%s "name"' % where, problems, limit=24)
+        detail = _text(item.get("detail"), '%s "detail"' % where, problems, required=False, limit=32)
+        sends = _parse_sends(item.get("sends", []), where, problems)
+        if name in names:
+            problems.append('The system "%s" is listed twice. Give each system its own name.' % name)
+        elif name:
+            names.add(name)
+            systems.append(System(name, detail, sends))
+
+    targets = {name: [] for name in names}
+    for system in systems:
+        for send in system.sends:
+            if send.to == system.name:
+                problems.append('The system "%s" cannot send to itself.' % system.name)
+            elif send.to not in names:
+                problems.append('There is no system named "%s" to receive this send from "%s". Check its "to" field.'
+                                % (send.to, system.name))
+            elif send.to in targets[system.name]:
+                problems.append('The system "%s" sends to "%s" more than once. Put both in one "what" field.'
+                                % (system.name, send.to))
+            else:
+                targets[system.name].append(send.to)
+    cycle = _system_cycle(systems, targets)
+    if cycle:
+        problems.append('The systems form a loop (%s). Describe the reply in the "what" words of the '
+                        'outgoing arrow.' % " -> ".join(cycle))
+    # An invalid name or send can make a connected system appear isolated.
+    if len(problems) == previous_problems:
+        receivers = {target for destinations in targets.values() for target in destinations}
+        for system in systems:
+            if not system.sends and system.name not in receivers:
+                problems.append('The system "%s" neither sends nor receives. Say what it sends or receives, '
+                                'or leave it out.' % system.name)
+    return systems
+
+
+def _parse_sends(raw, where, problems):
+    if not isinstance(raw, list):
+        problems.append('%s "sends" must be a list.' % where)
+        return []
+    sends = []
+    for number, item in enumerate(raw, 1):
+        place = "%s, send %d" % (where, number)
+        if not isinstance(item, dict):
+            problems.append('%s must be an object with "to" and "what".' % place)
+            continue
+        _unknown_keys(item, {"to", "what"}, place, problems)
+        to = _text(item.get("to"), '%s "to"' % place, problems, limit=24)
+        what = _text(item.get("what"), '%s "what"' % place, problems, limit=24)
+        if to and what:
+            sends.append(Send(to, what))
+    return sends
+
+
+def _system_cycle(systems, targets):
+    """Return the first closed path, including loops in a disconnected group of systems."""
+    checked = set()
+
+    def visit(name, path):
+        if name in path:
+            return path[path.index(name):] + [name]
+        if name not in checked:
+            for target in targets[name]:
+                cycle = visit(target, path + [name])
+                if cycle:
+                    return cycle
+            checked.add(name)
+        return []
+
+    for system in systems:
+        cycle = visit(system.name, [])
+        if cycle:
+            return cycle
+    return []
 
 
 def _parse_actors(raw, problems):

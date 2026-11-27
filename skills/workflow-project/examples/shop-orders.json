@@ -10,6 +10,17 @@
       {"name": "Shop", "role": "Takes payment and keeps the order record."},
       {"name": "Warehouse", "role": "Packs and dispatches paid orders."}
     ],
+    "systems": [
+      {"name": "Checkout", "detail": "Takes card details",
+       "sends": [{"to": "Payment", "what": "Card details"}]},
+      {"name": "Payment", "detail": "Approves the charge",
+       "sends": [{"to": "Orders", "what": "Approval"}]},
+      {"name": "Orders", "detail": "Keeps the order record",
+       "sends": [{"to": "Warehouse", "what": "Paid order"}]},
+      {"name": "Warehouse", "detail": "Packs paid orders",
+       "sends": [{"to": "Carrier", "what": "Parcel"}]},
+      {"name": "Carrier", "detail": "Collects the parcel"}
+    ],
     "assumptions": ["Each order ships as one parcel."],
     "open_questions": ["How often does the carrier collect parcels?"],
     "found_gaps": [

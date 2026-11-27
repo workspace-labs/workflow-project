@@ -18,7 +18,7 @@ import pdf_words
 import support
 from workflow_tool import brand, layout, model, pages
 
-EXPECTED_PAGES = {"leave-request": 3, "building-permit": 8, "workflow-project": 6}
+EXPECTED_PAGES = {"leave-request": 3, "building-permit": 8, "workflow-project": 6, "shop-orders": 5}
 TOOL = os.path.join(support.SCRIPTS, "draw_workflow.py")
 ENGLISH_DATE = "25 September 2026"
 

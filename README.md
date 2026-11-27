@@ -15,7 +15,7 @@ today's workflow first. Keep its JSON and PDF, then draw the workflow after the 
 The skill is the folder [`skills/workflow-project/`](skills/workflow-project/): its instructions,
 [`SKILL.md`](skills/workflow-project/SKILL.md), and its own drawing tool, so every agent draws the same PDF.
 
-**Version 0.5.0**
+**Version 0.6.0**
 
 ---
 
@@ -27,11 +27,14 @@ Every page lies sideways (A4 landscape).
 2. **The map**: what the project is, who takes part, and every part as one box with the page it is on.
    Gaps found, what we assumed, and what is still to confirm go under the map when they fit, or on a
    last page of their own.
-3. **For each part, one page**: a board with one row per person or system and time running across; a blue
+3. **What it is built from** appears when the workflow lists systems. A box names each screen, service
+   or store, and a blue arrow names what it sends to the next one.
+4. **For each part, one page**: a board with one row per person or system and time running across; a blue
    line for the normal path, dashed grey lines for the other paths, an amber box for a question, a red ring
    where it stops early; and under it a strip saying what comes out of every step.
 
-Three pages for a small project, one more for every part. There is no dashboard, no number tiles, no charts.
+The smallest workflow takes three pages. The optional systems diagram takes one more.
+There is no dashboard, no number tiles, no charts.
 The look is fixed: the Board look, with one font, Alexandria, for English and Arabic.
 
 **English or Arabic.** Add `"language": "ar"` to the workflow file and the same PDF is drawn in Arabic: the
@@ -106,7 +109,7 @@ python3 skills/workflow-project/scripts/draw_workflow.py my-workflow.json --chec
 python3 -m unittest discover -s tests
 ```
 
-112 checks: the file rules and their plain-language refusals; the drawing's cleanliness (no arrow through a box,
+The tests cover the file rules and their plain-language refusals, the drawing's cleanliness (no arrow through a box,
 no two arrows touching or crossing, nothing overlapping), judged by `tests/geometry_oracle.py`, which never
 imports the tool; every word of accepted PDFs read back with `pdftotext` (skipped where poppler is missing);
 the whole PDF (pages, page numbers, fonts); the brand file, including a website too wide for where
@@ -123,6 +126,7 @@ free of overlapping words).
 - A4 landscape, one page per part: about 8 columns of boxes and up to 5 lanes (with 4 or 5, short titles);
   bigger parts are split. Up to 3 answers per decision.
 - Parts on the map follow one another in order.
+- The systems page holds up to eight systems when their boxes, words and arrows fit.
 
 ## Layout
 

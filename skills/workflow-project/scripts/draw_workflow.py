@@ -65,9 +65,12 @@ def main(argv=None):
 
     steps = sum(1 for p in project.parts for n in p.nodes if n.type == "step")
     decisions = sum(1 for p in project.parts for n in p.nodes if n.type == "decision")
-    print("Checked: %s, %s, %s, %s." % (_count(len(project.parts), "part"),
-                                           _count(len(project.actors), "person or system", "people or systems"),
-                                           _count(steps, "step"), _count(decisions, "decision")))
+    counts = [_count(len(project.parts), "part"),
+              _count(len(project.actors), "person or system", "people or systems"),
+              _count(steps, "step"), _count(decisions, "decision")]
+    if project.systems:
+        counts.append(_count(len(project.systems), "system") + " on the systems page")
+    print("Checked: %s." % ", ".join(counts))
     print("Every arrow goes around the boxes, and every word fits its shape.")
     if args.check:
         print("Ready to draw.")

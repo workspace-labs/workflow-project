@@ -7,6 +7,7 @@ a typo never goes unnoticed.
 
 - A complete small file
 - `project`
+- Systems
 - `parts`
 - Nodes
 - Decisions
@@ -66,6 +67,34 @@ a typo never goes unnoticed.
 | `assumptions` | no | Up to 8 short sentences: what you assumed. |
 | `open_questions` | no | Up to 8 short sentences: what is still to confirm. |
 | `found_gaps` | no | For a project that is already built, up to 8 short sentences (220 characters each) about gaps confirmed while mapping it. |
+| `systems` | no | Screens, services or stores to draw on one page after the map. |
+
+## Systems
+
+Omit `systems` to go straight from the map to the parts. When present, give 2 to 8
+systems. Each needs a unique `name` (up to 24 characters). An optional `detail` (up to
+32 characters) describes its job. For each entry in the optional `sends` list, `to`
+must match another system's name and `what` names the information or item sent (up to
+24 characters). Every system must send or receive something. List a receiver only once
+per sender and describe everything sent between that pair in the same `what` field.
+
+For example, this field goes inside `project`.
+
+```json
+{
+  "systems": [
+    {"name": "Checkout", "detail": "Takes payment details",
+     "sends": [{"to": "Payment service", "what": "Card details"}]},
+    {"name": "Payment service", "detail": "Checks the payment"}
+  ]
+}
+```
+
+Systems that receive from nobody share the first column. Each receiver follows its
+furthest sender. Reading starts on the right in Arabic. A system cannot send to itself
+or form a loop. Describe a reply in the forward arrow's `what` text. The diagram must
+fit on one page with room for every label and arrow. Even fewer than eight systems
+can be too crowded. Shorten labels or show fewer systems when the tool asks.
 
 ## `parts`
 

@@ -12,7 +12,9 @@ what gets installed and uploaded. Tests live outside it in `tests/`, so they nev
 | `workflow_tool/layout.py` | places lanes (rows), columns and nodes, wraps their words, fills the strip under the lanes | `theme`, `routing`, `model` (its error, the node types), `language` (the tool's own words on the board) |
 | `workflow_tool/routing.py` | routes every arrow around every box, across the page | `theme` (answer size) |
 | `workflow_tool/render_diagram.py` | draws a laid-out part (the board, its strip) and the key | `theme`, `paint`, `layout`, `language` |
-| `workflow_tool/pages.py` | draws the whole PDF straight onto the canvas (cover, map, one page per part, the last page when needed); each page has a `_plan_...` that measures every word first, and `preflight` runs them all | `theme`, `paint`, `render_diagram`, `language`, `mirror` |
+| `workflow_tool/systems_layout.py` | assigns systems to columns, fits the words, and finds room for every arrow and its label | `theme`, `layout` (word wrapping), `routing` (rectangles), `model` (its error) |
+| `workflow_tool/render_systems.py` | draws the measured system boxes, arrows and labels | `systems_layout`, `theme`, `paint`, `render_diagram` (line weights) |
+| `workflow_tool/pages.py` | plans, numbers and draws the cover, map, optional systems page, part pages and closing page when needed | `theme`, `paint`, `render_diagram`, `systems_layout`, `render_systems`, `language`, `mirror`, `model` (its error) |
 | `workflow_tool/mirror.py` | the canvas for a right-to-left language: mirrors the whole page and draws the words the right way round | `theme` |
 | `workflow_tool/brand.py` | reads and checks `assets/brand.json`: whose name, logo and website the PDF carries | `theme`, `model` (its error) |
 | `workflow_tool/paint.py` | small canvas helpers: accent words, rounded arrows, logo tile | `theme`, `language` |
@@ -22,14 +24,14 @@ what gets installed and uploaded. Tests live outside it in `tests/`, so they nev
 
 ## Direction
 
-`language` and `script` are at the bottom and depend on nothing of ours; `theme` sits on them. Geometry (`layout`, `routing`) never imports
-drawing code (`paint`, `render_diagram`, `pages`): it can be tested without drawing anything. Only the
+`language` and `script` are at the bottom and depend on nothing of ours; `theme` sits on them. Geometry (`layout`, `routing`, `systems_layout`) never imports
+drawing code (`paint`, `render_diagram`, `render_systems`, `pages`): it can be tested without drawing anything. Only the
 command line wires the parts together.
 
 ## Right to left
 
 A right-to-left page is the English page, mirrored: `pages.py` asks the canvas to flip each page
-(`mirror.py`), and the canvas flips the words and the logo back. So `layout.py` and `routing.py` know
+(`mirror.py`), and the canvas flips the words and the logo back. So the layout and routing modules know
 nothing about direction, and no page has a second version. Why it is built this way, and why without a
 text-shaping library, is in `docs/adr/0002-arabic-is-drawn-by-the-tool-itself.md`.
 

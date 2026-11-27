@@ -6,6 +6,8 @@
   workflow: a PDF showing how it works from A to Z.
 - For a built project, the agent reads it first, then draws how it works today and shows the gaps found.
   Record each confirmed gap in the list, including gaps drawn as stops.
+- A project with multiple screens, services or stores can include one systems page after the map.
+  It names the systems and shows what each sends to the others. A people-only process skips this page.
 - When someone asks to **develop a built project** (a new feature, or a change to how it works), hand
   over today's workflow first. A development adds or changes a step, a decision, an actor or a part.
   Keep today's JSON and PDF, then draw the workflow after the agreed change.

@@ -3,6 +3,23 @@
 All notable changes to this project. The version is `VERSION` in
 `skills/workflow-project/scripts/workflow_tool/__init__.py`.
 
+## [0.6.0] - 2026-11-27
+
+### Added
+
+- An optional “What it is built from” page after the map shows clients and reviewers which
+  screens, services and stores make up a project and what passes between them. It reads
+  right to left in Arabic. The shop-orders example shows the page in use.
+- The drawing tool checks that the systems and their labelled arrows fit on one page.
+  Workflows that omit `project.systems` keep their existing pages and numbering.
+
+### Fixed
+
+- Two senders can each reach the same two receivers on the systems page. The drawing tool
+  can route a send around the boxes when paths between the columns would cross.
+- The file check names any system that neither sends nor receives. If a sender lists
+  the same receiver twice, it asks for both messages in one `what` field.
+
 ## [0.5.0] - 2026-11-25
 
 ### Added
